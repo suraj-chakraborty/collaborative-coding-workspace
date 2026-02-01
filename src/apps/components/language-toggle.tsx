@@ -17,8 +17,17 @@ const languages = [
     { code: "hi", name: "हिन्दी" },
 ];
 
+import { useState, useEffect } from "react";
+
 export function LanguageToggle() {
     const { locale, setLocale } = useLingoContext();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <DropdownMenu>

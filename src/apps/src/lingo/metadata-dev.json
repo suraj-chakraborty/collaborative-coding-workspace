@@ -1,204 +1,487 @@
 {
   "entries": {
-    "0d258939f5d9": {
-      "type": "metadata",
-      "sourceText": "CCW | Collaborative Cloud Workspace",
-      "context": {
-        "fieldPath": "title",
-        "filePath": "../app/layout.tsx"
-      },
-      "hash": "0d258939f5d9",
-      "location": {
-        "filePath": "../app/layout.tsx",
-        "line": 18,
-        "column": 9
-      }
-    },
-    "26429419a24f": {
-      "type": "metadata",
-      "sourceText": "Advanced browser-based collaborative coding environment.",
-      "context": {
-        "fieldPath": "description",
-        "filePath": "../app/layout.tsx"
-      },
-      "hash": "26429419a24f",
-      "location": {
-        "filePath": "../app/layout.tsx",
-        "line": 19,
-        "column": 15
-      }
-    },
-    "7e98741c14b5": {
-      "type": "content",
-      "sourceText": "Toggle language",
-      "context": {
-        "componentName": "LanguageToggle",
-        "filePath": "../components/language-toggle.tsx"
-      },
-      "hash": "7e98741c14b5",
-      "location": {
-        "filePath": "../components/language-toggle.tsx",
-        "line": 28,
-        "column": 20
-      }
-    },
-    "bce72ca8dd8f": {
+    "1fbc5864e830": {
       "type": "content",
       "sourceText": "CCW",
       "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
+        "componentName": "DashboardPage",
+        "filePath": "../app/dashboard/page.tsx"
       },
-      "hash": "bce72ca8dd8f",
+      "hash": "1fbc5864e830",
       "location": {
-        "filePath": "../app/page.tsx",
-        "line": 16,
-        "column": 12
-      }
-    },
-    "cfaf76f94f15": {
-      "type": "content",
-      "sourceText": "Login",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "cfaf76f94f15",
-      "location": {
-        "filePath": "../app/page.tsx",
-        "line": 21,
-        "column": 14
-      }
-    },
-    "8325e29edb40": {
-      "type": "content",
-      "sourceText": "Get Started",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "8325e29edb40",
-      "location": {
-        "filePath": "../app/page.tsx",
-        "line": 24,
-        "column": 14
-      }
-    },
-    "e7ba91a35c25": {
-      "type": "content",
-      "sourceText": "Next-Gen Cloud IDE Now in Beta",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "e7ba91a35c25",
-      "location": {
-        "filePath": "../app/page.tsx",
-        "line": 38,
-        "column": 14
-      }
-    },
-    "966fa8b05487": {
-      "type": "content",
-      "sourceText": "Code Together, <br0></br0><span0>Scale Anywhere.</span0>",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "966fa8b05487",
-      "location": {
-        "filePath": "../app/page.tsx",
-        "line": 41,
-        "column": 12
-      }
-    },
-    "f57f81354beb": {
-      "type": "content",
-      "sourceText": "Collaborative Cloud Workspace (CCW) provides instant, isolated development environments on any device. Code, build, and deploy with your team in real-time.",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "f57f81354beb",
-      "location": {
-        "filePath": "../app/page.tsx",
-        "line": 46,
-        "column": 12
-      }
-    },
-    "4c53f9c9a885": {
-      "type": "content",
-      "sourceText": "Launch Your Workspace",
-      "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
-      },
-      "hash": "4c53f9c9a885",
-      "location": {
-        "filePath": "../app/page.tsx",
+        "filePath": "../app/dashboard/page.tsx",
         "line": 53,
-        "column": 16
+        "column": 20
       }
     },
-    "8c0c9194a38c": {
-      "type": "content",
-      "sourceText": "Star on GitHub",
+    "c59f7487b179": {
+      "type": "attribute",
+      "sourceText": "Search workspaces...",
       "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
+        "attributeName": "placeholder",
+        "componentName": "DashboardPage",
+        "filePath": "../app/dashboard/page.tsx"
       },
-      "hash": "8c0c9194a38c",
+      "hash": "c59f7487b179",
       "location": {
-        "filePath": "../app/page.tsx",
-        "line": 58,
-        "column": 16
+        "filePath": "../app/dashboard/page.tsx",
+        "line": 78,
+        "column": 24
       }
     },
-    "4d238ed7e713": {
+    "f641b4e01f67": {
       "type": "content",
-      "sourceText": "Everything you need to build faster.",
+      "sourceText": "Your Workspaces",
       "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
+        "componentName": "DashboardPage",
+        "filePath": "../app/dashboard/page.tsx"
       },
-      "hash": "4d238ed7e713",
+      "hash": "f641b4e01f67",
       "location": {
-        "filePath": "../app/page.tsx",
-        "line": 71,
-        "column": 14
+        "filePath": "../app/dashboard/page.tsx",
+        "line": 96,
+        "column": 28
       }
     },
-    "97eb47480b06": {
+    "40a51a309a98": {
       "type": "content",
-      "sourceText": "High-performance tools for modern development teams.",
+      "sourceText": "Manage and launch your cloud development environments.",
       "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
+        "componentName": "DashboardPage",
+        "filePath": "../app/dashboard/page.tsx"
       },
-      "hash": "97eb47480b06",
+      "hash": "40a51a309a98",
       "location": {
-        "filePath": "../app/page.tsx",
-        "line": 72,
-        "column": 14
+        "filePath": "../app/dashboard/page.tsx",
+        "line": 97,
+        "column": 28
       }
     },
-    "1c517e785fbd": {
+    "34183d7391c4": {
       "type": "content",
-      "sourceText": "© 2026 Collaborative Cloud Workspace. Built with passion for developers.",
+      "sourceText": "No workspaces found. Create your first one to get started.",
       "context": {
-        "componentName": "LandingPage",
-        "filePath": "../app/page.tsx"
+        "componentName": "DashboardPage",
+        "filePath": "../app/dashboard/page.tsx"
       },
-      "hash": "1c517e785fbd",
+      "hash": "34183d7391c4",
       "location": {
-        "filePath": "../app/page.tsx",
-        "line": 108,
+        "filePath": "../app/dashboard/page.tsx",
+        "line": 142,
+        "column": 36
+      }
+    },
+    "6e15a14724e5": {
+      "type": "content",
+      "sourceText": "Close",
+      "context": {
+        "componentName": "DialogContent",
+        "filePath": "../components/ui/dialog.tsx"
+      },
+      "hash": "6e15a14724e5",
+      "location": {
+        "filePath": "../components/ui/dialog.tsx",
+        "line": 76,
+        "column": 12
+      }
+    },
+    "c35c4423746d": {
+      "type": "content",
+      "sourceText": "Close",
+      "context": {
+        "componentName": "DialogFooter",
+        "filePath": "../components/ui/dialog.tsx"
+      },
+      "hash": "c35c4423746d",
+      "location": {
+        "filePath": "../components/ui/dialog.tsx",
+        "line": 114,
         "column": 10
+      }
+    },
+    "6689f25882c8": {
+      "type": "content",
+      "sourceText": "New Workspace",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "6689f25882c8",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 167,
+        "column": 16
+      }
+    },
+    "670889f3aae3": {
+      "type": "content",
+      "sourceText": "Create New Workspace",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "670889f3aae3",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 174,
+        "column": 20
+      }
+    },
+    "29d29b472b6d": {
+      "type": "content",
+      "sourceText": "Deploy a new cloud development environment in seconds.",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "29d29b472b6d",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 175,
+        "column": 20
+      }
+    },
+    "4db5f07d40da": {
+      "type": "content",
+      "sourceText": "GitHub",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "4db5f07d40da",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 186,
+        "column": 24
+      }
+    },
+    "ac06daccea9b": {
+      "type": "content",
+      "sourceText": "Bitbucket",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "ac06daccea9b",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 189,
+        "column": 24
+      }
+    },
+    "80b4c4cf6281": {
+      "type": "content",
+      "sourceText": "Import URL",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "80b4c4cf6281",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 192,
+        "column": 24
+      }
+    },
+    "08cd78ae0a37": {
+      "type": "attribute",
+      "sourceText": "Search repositories...",
+      "context": {
+        "attributeName": "placeholder",
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "08cd78ae0a37",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 203,
+        "column": 40
+      }
+    },
+    "fc734bba3b2c": {
+      "type": "content",
+      "sourceText": "Your {source} account is not linked.",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "fc734bba3b2c",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 217,
+        "column": 48
+      }
+    },
+    "24115033d057": {
+      "type": "content",
+      "sourceText": "Connect {expression0}",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "24115033d057",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 219,
+        "column": 48
+      }
+    },
+    "123baacab243": {
+      "type": "content",
+      "sourceText": "No repositories found.",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "123baacab243",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 263,
+        "column": 52
+      }
+    },
+    "1d89ef2333b2": {
+      "type": "content",
+      "sourceText": "Git Repository URL",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "1d89ef2333b2",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 279,
+        "column": 32
+      }
+    },
+    "5891864e9900": {
+      "type": "attribute",
+      "sourceText": "https://github.com/username/repo.git",
+      "context": {
+        "attributeName": "placeholder",
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "5891864e9900",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 280,
+        "column": 32
+      }
+    },
+    "0305955ee025": {
+      "type": "content",
+      "sourceText": "Workspace Name",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "0305955ee025",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 295,
+        "column": 28
+      }
+    },
+    "daec5c9769a8": {
+      "type": "content",
+      "sourceText": "Description <span0>(Optional)</span0>",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "daec5c9769a8",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 303,
+        "column": 28
+      }
+    },
+    "f326154299be": {
+      "type": "content",
+      "sourceText": "Back",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "f326154299be",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 317,
+        "column": 32
+      }
+    },
+    "efb8744c5e51": {
+      "type": "content",
+      "sourceText": "{expression0} Create Workspace",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "efb8744c5e51",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 319,
+        "column": 28
+      }
+    },
+    "65e90c5dd468": {
+      "type": "content",
+      "sourceText": "Select a repository to proceed",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "65e90c5dd468",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 329,
+        "column": 24
+      }
+    },
+    "c82504b72d23": {
+      "type": "content",
+      "sourceText": "Back to Dashboard",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/page.tsx"
+      },
+      "hash": "c82504b72d23",
+      "location": {
+        "filePath": "../app/profile/page.tsx",
+        "line": 12,
+        "column": 24
+      }
+    },
+    "925a36054c89": {
+      "type": "content",
+      "sourceText": "Back to Dashboard",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "925a36054c89",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 12,
+        "column": 24
+      }
+    },
+    "4227edb5442c": {
+      "type": "content",
+      "sourceText": "Link {expression0}",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "4227edb5442c",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 221,
+        "column": 52
+      }
+    },
+    "8e26b6f15f25": {
+      "type": "content",
+      "sourceText": "Check Connection",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "../components/workspace/create-modal.tsx"
+      },
+      "hash": "8e26b6f15f25",
+      "location": {
+        "filePath": "../components/workspace/create-modal.tsx",
+        "line": 228,
+        "column": 52
+      }
+    },
+    "38b4c6ae4780": {
+      "type": "content",
+      "sourceText": "Account Linking",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "38b4c6ae4780",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 21,
+        "column": 24
+      }
+    },
+    "e04a4feb8c68": {
+      "type": "content",
+      "sourceText": "Link your GitHub or Bitbucket account to import repositories into your workspaces. <br0></br0> Once linked, you can return to the dashboard to refresh your connection.",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "e04a4feb8c68",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 22,
+        "column": 24
+      }
+    },
+    "7047be1ed8c5": {
+      "type": "content",
+      "sourceText": "Social Account Linking",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "7047be1ed8c5",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 21,
+        "column": 24
+      }
+    },
+    "d1280f7ede30": {
+      "type": "content",
+      "sourceText": "Connect your GitHub or Bitbucket accounts below to enable repository fetching.",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "d1280f7ede30",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 22,
+        "column": 24
+      }
+    },
+    "a8a217760b7d": {
+      "type": "content",
+      "sourceText": "<strong0>Note:</strong0> If you don''t see GitHub or Bitbucket in \"Connected accounts\", ensure they are enabled in your <strong1>Clerk Dashboard</strong1> under <em0>Configure > User & Authentication > Social Connections</em0>.",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "a8a217760b7d",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 25,
+        "column": 24
+      }
+    },
+    "d452c1dfede9": {
+      "type": "content",
+      "sourceText": "<strong0>Note:</strong0> If you don''t see GitHub or Bitbucket in \"Connected accounts\", ensure they are enabled in your <strong1>Clerk Dashboard</strong1> under <em0>Configure → User & Authentication → Social Connections</em0>.",
+      "context": {
+        "componentName": "ProfilePage",
+        "filePath": "../app/profile/[[...rest]]/page.tsx"
+      },
+      "hash": "d452c1dfede9",
+      "location": {
+        "filePath": "../app/profile/[[...rest]]/page.tsx",
+        "line": 25,
+        "column": 24
       }
     }
   },
   "stats": {
-    "totalEntries": 14,
-    "lastUpdated": "2026-01-31T18:13:21.544Z"
+    "totalEntries": 34,
+    "lastUpdated": "2026-02-01T12:54:55.332Z"
   }
 }

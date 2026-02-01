@@ -30,21 +30,22 @@ model User {
 }
 
 model Workspace {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  repoUrl   String?
-  repoPath  String?
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  repoUrl     String?
+  repoPath    String?
   
-  ownerId   String
-  owner     User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   
-  members   WorkspaceMember[]
-  invites   WorkspaceInvite[]
-  messages  ChatMessage[]
+  members     WorkspaceMember[]
+  invites     WorkspaceInvite[]
+  messages    ChatMessage[]
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model WorkspaceMember {
@@ -66,6 +67,7 @@ model WorkspaceInvite {
   id          String    @id @default(cuid())
   code        String    @unique
   role        Role      @default(EDITOR)
+  isRevoked   Boolean   @default(false)
   expiresAt   DateTime
   
   workspaceId String
