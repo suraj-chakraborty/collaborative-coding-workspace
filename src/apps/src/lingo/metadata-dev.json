@@ -1,0 +1,204 @@
+{
+  "entries": {
+    "0d258939f5d9": {
+      "type": "metadata",
+      "sourceText": "CCW | Collaborative Cloud Workspace",
+      "context": {
+        "fieldPath": "title",
+        "filePath": "../app/layout.tsx"
+      },
+      "hash": "0d258939f5d9",
+      "location": {
+        "filePath": "../app/layout.tsx",
+        "line": 18,
+        "column": 9
+      }
+    },
+    "26429419a24f": {
+      "type": "metadata",
+      "sourceText": "Advanced browser-based collaborative coding environment.",
+      "context": {
+        "fieldPath": "description",
+        "filePath": "../app/layout.tsx"
+      },
+      "hash": "26429419a24f",
+      "location": {
+        "filePath": "../app/layout.tsx",
+        "line": 19,
+        "column": 15
+      }
+    },
+    "7e98741c14b5": {
+      "type": "content",
+      "sourceText": "Toggle language",
+      "context": {
+        "componentName": "LanguageToggle",
+        "filePath": "../components/language-toggle.tsx"
+      },
+      "hash": "7e98741c14b5",
+      "location": {
+        "filePath": "../components/language-toggle.tsx",
+        "line": 28,
+        "column": 20
+      }
+    },
+    "bce72ca8dd8f": {
+      "type": "content",
+      "sourceText": "CCW",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "bce72ca8dd8f",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 16,
+        "column": 12
+      }
+    },
+    "cfaf76f94f15": {
+      "type": "content",
+      "sourceText": "Login",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "cfaf76f94f15",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 21,
+        "column": 14
+      }
+    },
+    "8325e29edb40": {
+      "type": "content",
+      "sourceText": "Get Started",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "8325e29edb40",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 24,
+        "column": 14
+      }
+    },
+    "e7ba91a35c25": {
+      "type": "content",
+      "sourceText": "Next-Gen Cloud IDE Now in Beta",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "e7ba91a35c25",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 38,
+        "column": 14
+      }
+    },
+    "966fa8b05487": {
+      "type": "content",
+      "sourceText": "Code Together, <br0></br0><span0>Scale Anywhere.</span0>",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "966fa8b05487",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 41,
+        "column": 12
+      }
+    },
+    "f57f81354beb": {
+      "type": "content",
+      "sourceText": "Collaborative Cloud Workspace (CCW) provides instant, isolated development environments on any device. Code, build, and deploy with your team in real-time.",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "f57f81354beb",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 46,
+        "column": 12
+      }
+    },
+    "4c53f9c9a885": {
+      "type": "content",
+      "sourceText": "Launch Your Workspace",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "4c53f9c9a885",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 53,
+        "column": 16
+      }
+    },
+    "8c0c9194a38c": {
+      "type": "content",
+      "sourceText": "Star on GitHub",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "8c0c9194a38c",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 58,
+        "column": 16
+      }
+    },
+    "4d238ed7e713": {
+      "type": "content",
+      "sourceText": "Everything you need to build faster.",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "4d238ed7e713",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 71,
+        "column": 14
+      }
+    },
+    "97eb47480b06": {
+      "type": "content",
+      "sourceText": "High-performance tools for modern development teams.",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "97eb47480b06",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 72,
+        "column": 14
+      }
+    },
+    "1c517e785fbd": {
+      "type": "content",
+      "sourceText": "© 2026 Collaborative Cloud Workspace. Built with passion for developers.",
+      "context": {
+        "componentName": "LandingPage",
+        "filePath": "../app/page.tsx"
+      },
+      "hash": "1c517e785fbd",
+      "location": {
+        "filePath": "../app/page.tsx",
+        "line": 108,
+        "column": 10
+      }
+    }
+  },
+  "stats": {
+    "totalEntries": 14,
+    "lastUpdated": "2026-01-31T18:13:21.544Z"
+  }
+}
