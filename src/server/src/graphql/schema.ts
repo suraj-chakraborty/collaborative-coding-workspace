@@ -66,6 +66,7 @@ export const typeDefs = gql`
       name: String!
       description: String
       userId: String!
+      email: String!
       repoUrl: String
       repoToken: String
     ): Workspace
@@ -127,16 +128,30 @@ export const resolvers = {
                 name,
                 description,
                 userId,
+                email,
                 repoUrl,
                 repoToken
             }: {
                 name: string;
                 description?: string;
                 userId: string;
+                email: string;
                 repoUrl?: string;
                 repoToken?: string;
             }
         ) => {
+            // 1. Ensure User exists (Upsert by Clerk ID)
+            await prisma.user.upsert({
+                where: { id: userId },
+                update: { email }, // Update email if it changed in Clerk
+                create: {
+                    id: userId,
+                    email: email,
+                    name: email.split('@')[0], // Fallback name
+                },
+            });
+
+            // 2. Create Workspace
             const workspace = await prisma.workspace.create({
                 data: {
                     name,

@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const CREATE_WORKSPACE = gql`
-  mutation CreateWorkspace($name: String!, $description: String, $userId: String!, $repoUrl: String, $repoToken: String) {
-    createWorkspace(name: $name, description: $description, userId: $userId, repoUrl: $repoUrl, repoToken: $repoToken) {
+  mutation CreateWorkspace($name: String!, $description: String, $userId: String!, $email: String!, $repoUrl: String, $repoToken: String) {
+    createWorkspace(name: $name, description: $description, userId: $userId, email: $email, repoUrl: $repoUrl, repoToken: $repoToken) {
       id
       name
     }
@@ -139,6 +139,7 @@ export function CreateWorkspaceModal() {
                     name: formData.name,
                     description: formData.description,
                     userId: user?.id,
+                    email: user?.primaryEmailAddress?.emailAddress,
                     repoUrl: (source === "github" || source === "bitbucket") ? selectedRepo?.clone_url : formData.repoUrl,
                     repoToken: token || undefined
                 },

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Terminal, Send, Users, ChevronLeft, Layout, Share2, Play, Square, RefreshCcw } from "lucide-react";
+import { Terminal, Send, Users, ChevronLeft, Layout, Share2, Play, Square, RefreshCcw, Settings } from "lucide-react";
 import Link from "next/link";
 
 export default function WorkspacePage({ params }: { params: { id: string } }) {
