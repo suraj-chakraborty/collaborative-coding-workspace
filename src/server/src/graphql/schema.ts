@@ -26,6 +26,7 @@ export const typeDefs = gql`
     id: String!
     name: String!
     description: String
+    ownerId: String!
     members: [WorkspaceMember!]!
     invites: [WorkspaceInvite!]!
     createdAt: String!
@@ -71,7 +72,7 @@ export const typeDefs = gql`
       repoToken: String
     ): Workspace
     joinWorkspace(inviteCode: String!, userId: String!): Workspace
-    deleteWorkspace(id: String!): Boolean
+    deleteWorkspace(id: String!, userId: String!): Boolean
     createInvite(workspaceId: String!, role: String!, inviterId: String!): WorkspaceInvite
   }
 `;
@@ -93,7 +94,12 @@ export const resolvers = {
                     workspaces: {
                         include: {
                             workspace: {
-                                include: { members: true },
+                                include: {
+                                    members: {
+                                        include: { user: true }
+                                    },
+                                    invites: true
+                                },
                             },
                         },
                     },
@@ -189,6 +195,15 @@ export const resolvers = {
             _: any,
             { workspaceId, role, inviterId }: { workspaceId: string; role: string; inviterId: string }
         ) => {
+            const workspace = await prisma.workspace.findUnique({
+                where: { id: workspaceId },
+                select: { ownerId: true }
+            });
+
+            if (!workspace || workspace.ownerId !== inviterId) {
+                throw new Error("Unauthorized: Only the owner can create invite codes");
+            }
+
             return prisma.workspaceInvite.create({
                 data: {
                     workspaceId,
@@ -203,13 +218,27 @@ export const resolvers = {
             _: any,
             { inviteCode, userId }: { inviteCode: string; userId: string }
         ) => {
+            // First ensure user exists (minimal info, based on clerk)
+            // Ideally we'd have name/email from the client here too
             const invite = await prisma.workspaceInvite.findUnique({
                 where: { code: inviteCode },
+                include: { workspace: true }
             });
 
             if (!invite || (invite as any).isRevoked) {
-                throw new Error("Invalid invite code");
+                throw new Error("Invalid or revoked invite code");
             }
+
+            // Sync user if they don't exist yet
+            await prisma.user.upsert({
+                where: { id: userId },
+                update: {},
+                create: {
+                    id: userId,
+                    email: `user-${userId}@clerk.com`, // Fallback, will sync on next login/dashboard load
+                    name: "New Contributor"
+                }
+            });
 
             // Check if already a member
             const existingMember = await prisma.workspaceMember.findUnique({
@@ -235,6 +264,29 @@ export const resolvers = {
             });
 
             return member.workspace;
+        },
+        deleteWorkspace: async (_: any, { id, userId }: { id: string; userId: string }) => {
+            const workspace = await prisma.workspace.findUnique({
+                where: { id },
+                select: { ownerId: true }
+            });
+
+            if (!workspace || workspace.ownerId !== userId) {
+                throw new Error("Unauthorized: Only the owner can delete this workspace");
+            }
+
+            // TODO: Stop and remove docker container
+            try {
+                const { DockerService } = require("../services/docker");
+                await DockerService.stopContainer(id).catch(() => null);
+            } catch (e) {
+                console.error("Failed to stop container on delete", e);
+            }
+
+            await prisma.workspace.delete({
+                where: { id },
+            });
+            return true;
         },
     },
 };

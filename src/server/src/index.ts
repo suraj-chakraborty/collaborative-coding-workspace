@@ -6,7 +6,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { DockerService } from "./services/docker";
-import { proxyRequestHandler } from "./services/proxy";
+import { proxyRequestHandler, proxy, getContainerPort } from "./services/proxy";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
@@ -42,10 +42,10 @@ const startServer = async () => {
     // Container management routes
     app.post("/api/containers/:id/start", async (req, res) => {
         try {
-            await DockerService.createContainer(req.params.id);
             const status = await DockerService.startContainer(req.params.id);
             res.json(status);
         } catch (error: any) {
+            console.error("Start error:", error);
             res.status(500).json({ error: error.message });
         }
     });
@@ -68,16 +68,39 @@ const startServer = async () => {
         }
     });
 
-    // Proxy routes
+    // Proxy routes for the IDE
     app.all("/ws/:id*", (req, res) => {
         proxyRequestHandler(req, res);
+    });
+
+    // Handle WebSocket upgrades for the proxy (code-server)
+    server.on("upgrade", async (req, socket, head) => {
+        const url = req.url || "";
+        const match = url.match(/^\/ws\/([^\/]+)/);
+
+        if (match) {
+            const workspaceId = match[1];
+            try {
+                const hostPort = await getContainerPort(workspaceId);
+                const target = `http://localhost:${hostPort}`;
+
+                // Rewrite URL for the container
+                req.url = url.replace(/^\/ws\/[^\/]+/, "");
+                if (req.url === "") req.url = "/";
+
+                proxy.ws(req, socket, head, { target });
+            } catch (error) {
+                console.error("WS Upgrade error:", error);
+                socket.destroy();
+            }
+        }
     });
 
     app.get("/health", (req, res) => {
         res.send("Server healthy");
     });
 
-    // Socket.IO for real-time features
+    // Socket.IO for real-time features (collaboration)
     io.on("connection", (socket) => {
         console.log("User connected:", socket.id);
 
@@ -94,6 +117,8 @@ const startServer = async () => {
     const PORT = process.env.PORT || 3001;
     server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
+        // Run initial cleanup
+        DockerService.cleanupStaleContainers();
     });
 };
 

@@ -1,8 +1,9 @@
 import simpleGit from "simple-git";
 import path from "path";
 import fs from "fs";
+import { CONFIG } from "../config";
 
-const WORKSPACE_ROOT = process.env.WORKSPACE_ROOT || path.join(process.cwd(), "workspaces");
+const WORKSPACE_ROOT = CONFIG.WORKSPACE_ROOT;
 
 // Ensure workspace root exists
 if (!fs.existsSync(WORKSPACE_ROOT)) {
