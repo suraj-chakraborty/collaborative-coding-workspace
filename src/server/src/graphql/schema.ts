@@ -66,7 +66,7 @@ export const typeDefs = gql`
       hostingType: String
       localPort: Int
     ): Workspace
-    joinWorkspace(inviteCode: String!, userId: String!): Workspace
+    joinWorkspace(inviteCode: String!, userId: String!, email: String, name: String, image: String): Workspace
     deleteWorkspace(id: String!, userId: String!): Boolean
     createInvite(workspaceId: String!, role: String!, inviterId: String!): WorkspaceInvite
   }
@@ -214,7 +214,7 @@ export const resolvers = {
         },
         joinWorkspace: async (
             _: any,
-            { inviteCode, userId }: { inviteCode: string; userId: string }
+            { inviteCode, userId, email, name, image }: { inviteCode: string; userId: string; email?: string; name?: string; image?: string; }
         ) => {
             // First ensure user exists (minimal info, based on clerk)
             // Ideally we'd have name/email from the client here too
@@ -230,11 +230,16 @@ export const resolvers = {
             // Sync user if they don't exist yet
             await prisma.user.upsert({
                 where: { id: userId },
-                update: {},
+                update: {
+                    email: email || undefined,
+                    name: name || undefined,
+                    image: image || undefined
+                },
                 create: {
                     id: userId,
-                    email: `user-${userId}@clerk.com`, // Fallback, will sync on next login/dashboard load
-                    name: "New Contributor"
+                    email: email || `user-${userId}@clerk.com`,
+                    name: name || "New Contributor",
+                    image: image,
                 }
             });
 
@@ -249,7 +254,12 @@ export const resolvers = {
             });
 
             if (existingMember) {
-                throw new Error("You are already a member of this workspace");
+                // If already a member, just return the workspace
+                const memberWithWorkspace = await prisma.workspaceMember.findUnique({
+                    where: { id: existingMember.id },
+                    include: { workspace: true },
+                });
+                return memberWithWorkspace?.workspace;
             }
 
             const member = await prisma.workspaceMember.create({

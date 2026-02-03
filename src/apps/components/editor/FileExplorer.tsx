@@ -99,7 +99,7 @@ export function FileExplorer({ workspaceId, onFileSelect, className }: FileExplo
     }
 
     return (
-        <div className={cn("h-full bg-zinc-900 border-r border-white/10 flex flex-col", className)}>
+        <div className={cn("h-full bg-zinc-900 flex flex-col", className)}>
             <div className="p-3 border-b border-white/5 bg-black/20">
                 <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Explorer</h3>
             </div>

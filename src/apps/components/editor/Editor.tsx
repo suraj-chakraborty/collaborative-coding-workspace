@@ -4,8 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
+import ReactMarkdown from "react-markdown";
+import { Button } from "@/components/ui/button";
 
 // Colors for cursor presence
 const CURSOR_COLORS = [
@@ -30,7 +32,9 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
     const [status, setStatus] = useState<"disconnected" | "connecting" | "connected">("disconnected");
     const providerRef = useRef<WebsocketProvider | null>(null);
     const docRef = useRef<Y.Doc>(new Y.Doc());
-    const bindingRef = useRef<MonacoBinding | null>(null);
+    const bindingRef = useRef<any>(null);
+    const [preview, setPreview] = useState(false);
+    const [content, setContent] = useState("");
 
     // 1. Initial File Load (Content Fetch)
     useEffect(() => {
@@ -88,6 +92,12 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
             color: randomColor,
         });
 
+        const handleUpdate = () => {
+            if (filePath) {
+                setContent(doc.getText(filePath).toString());
+            }
+        };
+
         let isBindingDestroyed = false;
 
         const initBinding = async () => {
@@ -109,10 +119,8 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
                 bindingRef.current = binding;
             }
 
-            // Check if we need to hydrate content (only if document is empty and we are the first ones presumably, 
-            // but 'yText' syncs separate from provider status, so checking IsEmpty is a heuristic)
+            // Hydrate content
             if (yText.toString() === "") {
-                console.log("Fetching content for", filePath);
                 try {
                     const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/read`, {
                         method: "POST",
@@ -122,11 +130,8 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
                     if (res.ok) {
                         const { content } = await res.json();
                         if (yText.toString() === "" && !isBindingDestroyed) {
-                            console.log("Hydrating content for", filePath);
                             yText.insert(0, content);
                         }
-                    } else {
-                        console.error("Failed to read file:", res.statusText);
                     }
                 } catch (e) {
                     console.error("Error reading file:", e);
@@ -135,11 +140,16 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
         };
 
         initBinding();
+        doc.on("update", handleUpdate);
 
         return () => {
             isBindingDestroyed = true;
             provider.disconnect();
-            bindingRef.current?.destroy();
+            if (bindingRef.current) {
+                bindingRef.current.destroy();
+                bindingRef.current = null;
+            }
+            doc.off("update", handleUpdate);
         };
     }, [filePath, workspaceId, socketUrl, user]);
 
@@ -159,44 +169,64 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
     return (
         <div className="h-full relative flex flex-col">
             {/* Status Bar */}
-            <div className="h-6 bg-zinc-900 border-b border-black flex items-center px-4 justify-between text-[10px] text-zinc-400 select-none">
+            <div className="h-8 bg-zinc-900 border-b border-black flex items-center px-4 justify-between text-[10px] text-zinc-400 select-none">
                 <span className="truncate max-w-[50%]">{filePath}</span>
-                <div className="flex items-center gap-2">
-                    <span
-                        className={`h-2 w-2 rounded-full ${status === "connected" ? "bg-emerald-500" :
-                            status === "connecting" ? "bg-amber-500" : "bg-red-500"
-                            }`}
-                    />
-                    <span>{status.toUpperCase()}</span>
+                <div className="flex items-center gap-3">
+                    {filePath.endsWith(".md") && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setPreview(!preview)}
+                            className="h-5 px-2 text-[10px] bg-white/5 hover:bg-white/10"
+                        >
+                            {preview ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                            {preview ? "Hide Preview" : "Show Preview"}
+                        </Button>
+                    )}
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={`h-2 w-2 rounded-full ${status === "connected" ? "bg-emerald-500" :
+                                status === "connecting" ? "bg-amber-500" : "bg-red-500"
+                                }`}
+                        />
+                        <span>{status.toUpperCase()}</span>
+                    </div>
                 </div>
             </div>
 
-            {/* Monaco Editor */}
-            <div className="flex-1 relative">
-                <Editor
-                    height="100%"
-                    theme="vs-dark"
-                    language={
-                        filePath.endsWith(".ts") || filePath.endsWith(".tsx") ? "typescript" :
-                            filePath.endsWith(".js") || filePath.endsWith(".jsx") ? "javascript" :
-                                filePath.endsWith(".css") ? "css" :
-                                    filePath.endsWith(".html") ? "html" :
-                                        filePath.endsWith(".json") ? "json" :
-                                            "markdown"
-                    }
-                    value="" // Value handled by Yjs
-                    onMount={handleEditorDidMount}
-                    options={{
-                        minimap: { enabled: false },
-                        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-                        fontSize: 14,
-                        lineHeight: 24,
-                        padding: { top: 16 },
-                        smoothScrolling: true,
-                        cursorBlinking: "smooth",
-                        cursorSmoothCaretAnimation: "on",
-                    }}
-                />
+            {/* Editor + Preview Split View */}
+            <div className="flex-1 flex overflow-hidden">
+                <div className={`flex-1 relative ${preview ? 'border-r border-white/10' : ''}`}>
+                    <Editor
+                        height="100%"
+                        theme="vs-dark"
+                        language={
+                            filePath.endsWith(".ts") || filePath.endsWith(".tsx") ? "typescript" :
+                                filePath.endsWith(".js") || filePath.endsWith(".jsx") ? "javascript" :
+                                    filePath.endsWith(".css") ? "css" :
+                                        filePath.endsWith(".html") ? "html" :
+                                            filePath.endsWith(".json") ? "json" :
+                                                "markdown"
+                        }
+                        value="" // Value handled by Yjs
+                        onMount={handleEditorDidMount}
+                        options={{
+                            minimap: { enabled: false },
+                            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+                            fontSize: 14,
+                            lineHeight: 24,
+                            padding: { top: 16 },
+                            smoothScrolling: true,
+                            cursorBlinking: "smooth",
+                            cursorSmoothCaretAnimation: "on",
+                        }}
+                    />
+                </div>
+                {preview && filePath.endsWith(".md") && (
+                    <div className="flex-1 bg-[#1e1e1e] p-8 overflow-y-auto prose prose-invert prose-sm max-w-none prose-pre:bg-zinc-900 prose-pre:border prose-pre:border-white/5">
+                        <ReactMarkdown>{content}</ReactMarkdown>
+                    </div>
+                )}
             </div>
         </div>
     );

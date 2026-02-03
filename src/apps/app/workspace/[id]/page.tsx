@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { Button } from "@/components/ui/button";
-import { Terminal, ChevronLeft, Settings, Loader2, MessageSquare, RotateCw, AlertCircle, Trash2 } from "lucide-react";
+import { Terminal, ChevronLeft, Settings, Loader2, MessageSquare, RotateCw, AlertCircle, Trash2, Mic, Phone } from "lucide-react";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,9 @@ import { gql } from "@apollo/client";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { ChatSidebar } from "@/components/editor/ChatSidebar";
+import { VoiceChatPanel } from "@/components/workspace/voice-chat";
+import { CustomIDE } from "@/components/editor/CustomIDE";
+import { Layout, Globe } from "lucide-react";
 
 const GET_WORKSPACE = gql`
   query GetWorkspace($id: String!) {
@@ -48,6 +51,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const [isRestarting, setIsRestarting] = useState(false);
     const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; action?: string } | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [viewMode, setViewMode] = useState<"cloud" | "collab">("collab");
     const router = useRouter();
 
     const [deleteWorkspace] = useMutation(DELETE_WORKSPACE);
@@ -241,14 +245,30 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                         <RotateCw className="h-4 w-4" />
                     </Button>
 
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        className={`h-8 w-8 ${isChatOpen ? "bg-white/10 text-white" : "text-zinc-400 hover:text-white hover:bg-white/5"}`}
-                        onClick={() => setIsChatOpen(!isChatOpen)}
-                    >
-                        <MessageSquare className="h-4 w-4" />
-                    </Button>
+                    <div className="h-4 w-[1px] bg-white/10 mx-1" />
+
+                    <div className="flex bg-black/40 p-1 rounded-md border border-white/5">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setViewMode("collab")}
+                            className={`h-7 px-3 text-[10px] uppercase tracking-tighter transition-all ${viewMode === "collab" ? "bg-indigo-600/20 text-indigo-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                        >
+                            <Layout className="h-3 w-3 mr-1.5" />
+                            Collaborative
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setViewMode("cloud")}
+                            className={`h-7 px-3 text-[10px] uppercase tracking-tighter transition-all ${viewMode === "cloud" ? "bg-indigo-600/20 text-indigo-400" : "text-zinc-500 hover:text-zinc-300"}`}
+                        >
+                            <Globe className="h-3 w-3 mr-1.5" />
+                            Cloud IDE
+                        </Button>
+                    </div>
+
+
 
                     {isOwner && (
                         <Button
@@ -272,14 +292,18 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 </div>
             </header>
 
-            {/* Main Area - Docker Environment */}
+            {/* Main Area - Docker Environment or Custom IDE */}
             <div className="flex flex-1 overflow-hidden relative">
                 {containerStatus === "RUNNING" ? (
-                    <iframe
-                        src={`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/home/coder/workspace`}
-                        className="w-full h-full border-0"
-                        allow="clipboard-read; clipboard-write"
-                    />
+                    viewMode === "cloud" ? (
+                        <iframe
+                            src={`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/home/coder/workspace`}
+                            className="w-full h-full border-0"
+                            allow="clipboard-read; clipboard-write"
+                        />
+                    ) : (
+                        <CustomIDE workspaceId={id} socketUrl={socketUrl} />
+                    )
                 ) : (
                     <div className="flex flex-col items-center justify-center w-full h-full text-zinc-500 bg-[#1e1e1e]">
                         {containerStatus === "ERROR" ? (
@@ -340,6 +364,19 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                     </div>
                 )}
             </div>
+
+            {/* Floating Chat Button */}
+            {!isChatOpen && (
+                <div className="absolute bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-5 duration-300">
+                    <Button
+                        size="icon"
+                        className="h-14 w-14 rounded-full shadow-2xl bg-indigo-600 hover:bg-indigo-500 transition-all duration-300 hover:scale-105"
+                        onClick={() => setIsChatOpen(true)}
+                    >
+                        <MessageSquare className="h-6 w-6 text-white" />
+                    </Button>
+                </div>
+            )}
 
             {/* Chat Sidebar Overlay */}
             <ChatSidebar

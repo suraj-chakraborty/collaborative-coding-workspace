@@ -23,8 +23,8 @@ const GET_WORKSPACE_BY_INVITE = gql`
 `;
 
 const JOIN_WORKSPACE = gql`
-  mutation JoinWorkspace($inviteCode: String!, $userId: String!) {
-    joinWorkspace(inviteCode: $inviteCode, userId: $userId) {
+  mutation JoinWorkspace($inviteCode: String!, $userId: String!, $email: String, $name: String, $image: String) {
+    joinWorkspace(inviteCode: $inviteCode, userId: $userId, email: $email, name: $name, image: $image) {
       id
     }
   }
@@ -51,7 +51,10 @@ export default function JoinPage({ params }: { params: Promise<{ inviteCode: str
             const { data: joinData } = await joinWorkspace({
                 variables: {
                     inviteCode: inviteCode,
-                    userId: user.id
+                    userId: user.id,
+                    email: user.primaryEmailAddress?.emailAddress,
+                    name: user.fullName,
+                    image: user.imageUrl
                 }
             }) as any;
             toast.success(`Joined ${data.workspaceByInvite.name}!`);

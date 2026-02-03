@@ -193,8 +193,44 @@ export class DockerService {
                         });
                         console.log(`Repository cloned successfully.`);
                     }
+
+                    // Auto-stack Setup
+                    console.log(`[DockerService] Detecting project stack for ${workspaceId}...`);
+                    const setupCmd = `
+                        if [ -f "/home/coder/workspace/package.json" ]; then
+                            echo "Node.js project detected."
+                            if ! command -v node > /dev/null; then
+                                curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && apt-get install -y nodejs
+                            fi
+                        fi
+                        if [ -f "/home/coder/workspace/Cargo.toml" ]; then
+                            echo "Rust project detected."
+                            if ! command -v cargo > /dev/null; then
+                                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                                export PATH="$HOME/.cargo/bin:$PATH"
+                            fi
+                        fi
+                        if [ -f "/home/coder/workspace/go.mod" ]; then
+                            echo "Go project detected."
+                            if ! command -v go > /dev/null; then
+                                apt-get update && apt-get install -y golang-go
+                            fi
+                        fi
+                    `;
+
+                    const setupExec = await container.exec({
+                        Cmd: ['sh', '-c', setupCmd],
+                        AttachStdout: true,
+                        AttachStderr: true
+                    });
+                    const setupStream = await setupExec.start({});
+                    await new Promise((resolve) => {
+                        setupStream.on('data', chunk => console.log(`[Setup] ${chunk.toString().trim()}`));
+                        setupStream.on('end', resolve);
+                    });
+
                 } catch (cloneErr) {
-                    console.error("Failed to clone repository inside container", cloneErr);
+                    console.error("Failed to setup environment inside container", cloneErr);
                 }
             }
             // Provision settings - do it every time we start/ensure container
@@ -361,8 +397,15 @@ export class DockerService {
             const ccwContainers = containers.filter(c => c.Names.some(name => name.startsWith("/ccw-")));
 
             for (const c of ccwContainers) {
-                // Potential logic for removing containers that haven't been used in a while
-                // For now, just a placeholder for infra maintenance
+                // If container is exited, remove it
+                if (c.State === "exited" || c.State === "dead") {
+                    try {
+                        console.log(`[Cleanup] Removing stale container ${c.Names[0]}...`);
+                        await docker.getContainer(c.Id).remove({ force: true });
+                    } catch (err) {
+                        console.error(`[Cleanup] Failed to remove ${c.Id}`, err);
+                    }
+                }
             }
         } catch (e) {
             console.error("Cleanup error:", e);
