@@ -29,13 +29,21 @@ model User {
   updatedAt     DateTime  @updatedAt
 }
 
+enum HostingType {
+  CLOUD
+  LOCAL
+}
+
 model Workspace {
   id          String   @id @default(cuid())
   name        String
   slug        String   @unique
   description String?
   repoUrl     String?
+  repoToken   String?
   repoPath    String?
+  hostingType HostingType @default(CLOUD)
+  localPort   Int?
   
   ownerId     String
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)

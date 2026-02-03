@@ -1,17 +1,8 @@
-import dotenv from "dotenv";
-import path from "path";
-dotenv.config({ path: path.join(__dirname, "../../../.env") });
 import { gql } from "graphql-tag";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import pg from "pg";
 import { GitService } from "../services/git";
-
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
-
-console.log("Prisma initialized with Prisma 7 adapter. DB URL status:", process.env.DATABASE_URL ? "Defined" : "UNDEFINED");
+import { DockerService } from "../services/docker";
+import { prisma } from "../lib/prisma";
+import { inngest } from "../lib/inngest";
 
 export const typeDefs = gql`
   type User {
@@ -29,6 +20,8 @@ export const typeDefs = gql`
     ownerId: String!
     members: [WorkspaceMember!]!
     invites: [WorkspaceInvite!]!
+    hostingType: String!
+    localPort: Int
     createdAt: String!
     updatedAt: String!
     containers: [Container!]
@@ -70,6 +63,8 @@ export const typeDefs = gql`
       email: String!
       repoUrl: String
       repoToken: String
+      hostingType: String
+      localPort: Int
     ): Workspace
     joinWorkspace(inviteCode: String!, userId: String!): Workspace
     deleteWorkspace(id: String!, userId: String!): Boolean
@@ -136,7 +131,9 @@ export const resolvers = {
                 userId,
                 email,
                 repoUrl,
-                repoToken
+                repoToken,
+                hostingType = "CLOUD",
+                localPort,
             }: {
                 name: string;
                 description?: string;
@@ -144,6 +141,8 @@ export const resolvers = {
                 email: string;
                 repoUrl?: string;
                 repoToken?: string;
+                hostingType?: string;
+                localPort?: number;
             }
         ) => {
             // 1. Ensure User exists (Upsert by Clerk ID)
@@ -153,7 +152,7 @@ export const resolvers = {
                 create: {
                     id: userId,
                     email: email,
-                    name: email.split('@')[0], // Fallback name
+                    name: email.split("@")[0], // Fallback name
                 },
             });
 
@@ -164,6 +163,10 @@ export const resolvers = {
                     slug: name.toLowerCase().replace(/ /g, "-") + "-" + Math.random().toString(36).substring(2, 7),
                     description,
                     ownerId: userId,
+                    hostingType: (hostingType as any) || "CLOUD",
+                    localPort,
+                    repoUrl,
+                    repoToken,
                     members: {
                         create: {
                             userId,
@@ -173,22 +176,17 @@ export const resolvers = {
                 },
             });
 
-            // Handle Git Operations
-            if (repoUrl) {
-                try {
-                    console.log(`Cloning ${repoUrl} for workspace ${workspace.id}`);
-                    await GitService.cloneRepository(repoUrl, workspace.id, repoToken);
-                } catch (e: any) {
-                    console.error("Failed to clone repo", e);
-                }
-            } else {
-                try {
-                    await GitService.initRepository(workspace.id);
-                } catch (e: any) {
-                    console.error("Failed to init repo", e);
-                }
+            // Trigger background setup via Inngest
+            try {
+                await inngest.send({
+                    name: "workspace/setup",
+                    data: { workspaceId: workspace.id }
+                });
+                console.log(`[GraphQL] Triggered Inngest setup for workspace ${workspace.id}`);
+            } catch (err: any) {
+                console.error(`[GraphQL] Failed to trigger Inngest setup: ${err.message}`);
+                // In local dev, we might still want the workspace to be "created" even if background setup fails
             }
-
             return workspace;
         },
         createInvite: async (
@@ -275,12 +273,11 @@ export const resolvers = {
                 throw new Error("Unauthorized: Only the owner can delete this workspace");
             }
 
-            // TODO: Stop and remove docker container
+            // Stop and remove docker container
             try {
-                const { DockerService } = require("../services/docker");
-                await DockerService.stopContainer(id).catch(() => null);
+                await DockerService.stopAndRemoveContainer(id).catch(() => null);
             } catch (e) {
-                console.error("Failed to stop container on delete", e);
+                console.error("Failed to remove container on delete", e);
             }
 
             await prisma.workspace.delete({

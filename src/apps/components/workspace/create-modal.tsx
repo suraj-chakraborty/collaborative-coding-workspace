@@ -12,13 +12,28 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Github, GitBranch, Loader2, Link as LinkIcon } from "lucide-react";
+import {
+    Github,
+    Terminal,
+    Plus,
+    Loader2,
+    Search,
+    ExternalLink,
+    LayoutGrid,
+    FileCode,
+    Lock,
+    Globe,
+    Cpu,
+    PlusCircle,
+    GitBranch,
+    Link as LinkIcon
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const CREATE_WORKSPACE = gql`
-  mutation CreateWorkspace($name: String!, $description: String, $userId: String!, $email: String!, $repoUrl: String, $repoToken: String) {
-    createWorkspace(name: $name, description: $description, userId: $userId, email: $email, repoUrl: $repoUrl, repoToken: $repoToken) {
+  mutation CreateWorkspace($name: String!, $description: String, $userId: String!, $email: String!, $repoUrl: String, $repoToken: String, $hostingType: String, $localPort: Int) {
+    createWorkspace(name: $name, description: $description, userId: $userId, email: $email, repoUrl: $repoUrl, repoToken: $repoToken, hostingType: $hostingType, localPort: $localPort) {
       id
       name
     }
@@ -39,6 +54,7 @@ export function CreateWorkspaceModal() {
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [tokenMissing, setTokenMissing] = useState(false);
     const [refresh, setRefresh] = useState(0);
+    const [hostingType, setHostingType] = useState<"CLOUD" | "LOCAL">("CLOUD");
 
     // Form State
     const [selectedRepo, setSelectedRepo] = useState<any>(null);
@@ -141,7 +157,9 @@ export function CreateWorkspaceModal() {
                     userId: user?.id,
                     email: user?.primaryEmailAddress?.emailAddress,
                     repoUrl: (source === "github" || source === "bitbucket") ? selectedRepo?.clone_url : formData.repoUrl,
-                    repoToken: token || undefined
+                    repoToken: token || undefined,
+                    hostingType,
+                    localPort: hostingType === "LOCAL" ? 5173 : undefined
                 },
             }) as any;
 
@@ -307,6 +325,48 @@ export function CreateWorkspaceModal() {
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                 className="bg-white/5 border-white/10"
                             />
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                            <Label className="text-sm font-bold uppercase tracking-wider text-zinc-500">Hosting Strategy</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setHostingType("CLOUD")}
+                                    className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${hostingType === "CLOUD"
+                                        ? "border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500"
+                                        : "border-white/5 bg-white/5 hover:bg-white/10"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${hostingType === "CLOUD" ? "bg-indigo-500/20 text-indigo-400" : "bg-zinc-800 text-zinc-500"}`}>
+                                            <Globe className="h-5 w-5" />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-sm font-semibold">Run in Cloud</div>
+                                            <div className="text-[10px] text-zinc-500">Persistent environment running on our secure infrastructure</div>
+                                        </div>
+                                    </div>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setHostingType("LOCAL")}
+                                    className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all ${hostingType === "LOCAL"
+                                        ? "border-indigo-500 bg-indigo-500/10 ring-1 ring-indigo-500"
+                                        : "border-white/5 bg-white/5 hover:bg-white/10"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`p-2 rounded-lg ${hostingType === "LOCAL" ? "bg-indigo-500/20 text-indigo-400" : "bg-zinc-800 text-zinc-500"}`}>
+                                            <Cpu className="h-5 w-5" />
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="text-sm font-semibold">Run Locally</div>
+                                            <div className="text-[10px] text-zinc-500">Shareable Docker environment hosted on your own machine</div>
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
