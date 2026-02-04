@@ -28,6 +28,10 @@ export class TerminalService {
         const container = docker.getContainer(containerName);
 
         try {
+            // Ensure container is running and not restarting
+            const { DockerService } = await import("./docker");
+            await DockerService.waitForContainerRunning(workspaceId);
+
             // First try bash, then sh
             const shells = ['/bin/bash', '/bin/sh', 'sh', 'bash'];
             let exec: any = null;
@@ -40,6 +44,13 @@ export class TerminalService {
                         AttachStdout: true,
                         AttachStderr: true,
                         Tty: true,
+                        User: 'abc',
+                        WorkingDir: '/home/coder/workspace',
+                        Env: [
+                            'PATH=/home/coder/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+                            'HOME=/home/coder',
+                            'USER=abc'
+                        ],
                         Cmd: [shell]
                     });
                     currentShell = shell;

@@ -1,15 +1,30 @@
 import Dockerode from "dockerode";
 import path from "path";
 import fs from "fs";
+import os from "os";
+import { execSync } from "child_process";
 import { CONFIG } from "../config";
 import { prisma } from "../lib/prisma";
+import { detectStack } from "../lib/stack-detector";
+
+import { progressService } from "./progress";
 
 const docker = new Dockerode();
 const WORKSPACE_ROOT = CONFIG.WORKSPACE_ROOT;
 
+// Shared Cache Volumes
+const SHARED_VOLUMES = {
+    PNPM_STORE: "cc-pnpm-store",
+    PIP_CACHE: "cc-pip-cache",
+    CARGO_CACHE: "cc-cargo-cache",
+    GRADLE_CACHE: "cc-gradle-cache",
+    MAVEN_REPO: "cc-maven-repo"
+};
+
 export class DockerService {
     static async createContainer(workspaceId: string) {
-        const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        // Re-fetch to get latest data (like stack) which might have been updated by Inngest
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
         if (!workspace) throw new Error("Workspace not found");
 
         const containerName = `ccw-${workspaceId}`;
@@ -38,14 +53,49 @@ export class DockerService {
             console.log(`[DockerService] Workspace ${workspaceId} -> Using Cloud Volume: ${mountSource}`);
         }
 
+        // Perform on-the-fly stack detection if missing to ensure correct image selection
+        let stack = (workspace as any).stack;
+        if (!stack && workspace.repoUrl) {
+            console.log(`[DockerService] Stack unknown for ${workspaceId}, detecting before creation...`);
+            const tempDir = path.join(os.tmpdir(), `cc-detect-${workspaceId}`);
+            try {
+                if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+                fs.mkdirSync(tempDir, { recursive: true });
+
+                let cloneUrl = workspace.repoUrl;
+                if ((workspace as any).repoToken) {
+                    cloneUrl = workspace.repoUrl.replace("https://", `https://${(workspace as any).repoToken}@`);
+                }
+
+                execSync(`git clone --depth 1 --no-checkout ${cloneUrl} .`, { cwd: tempDir, stdio: 'ignore' });
+                const files = execSync(`git ls-tree -r --name-only HEAD`, { cwd: tempDir }).toString().split("\n");
+                stack = detectStack(files);
+
+                console.log(`[DockerService] Detected stack: ${stack}`);
+                await prisma.workspace.update({
+                    where: { id: workspaceId },
+                    data: { stack } as any
+                });
+            } catch (err) {
+                console.error("[DockerService] Stack detection failed:", err);
+                stack = "unknown";
+            } finally {
+                if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
+            }
+        }
+
+        const image = CONFIG.STACK_IMAGES[stack || "unknown"] || CONFIG.STACK_IMAGES.unknown;
+        console.log(`[DockerService] Selected image for workspace ${workspaceId} (stack: ${stack}): ${image}`);
+
         try {
             const existingContainer = docker.getContainer(containerName);
             const data = await existingContainer.inspect().catch(() => null);
 
             if (data) {
                 // Check if image matches what we expect
-                if (data.Image !== CONFIG.DOCKER_IMAGE && data.Config?.Image !== CONFIG.DOCKER_IMAGE) {
-                    console.log(`[DockerService] Container ${containerName} uses old image. Recreating with ${CONFIG.DOCKER_IMAGE}...`);
+                if (data.Image !== image && data.Config?.Image !== image) {
+                    progressService.emitProgress(workspaceId, "PREPARING", 10, "Upgrading environment engine...");
+                    console.log(`[DockerService] Container ${containerName} uses old image. Recreating with ${image}...`);
                     await existingContainer.remove({ force: true }).catch(() => null);
                     // Continue to creation
                 } else {
@@ -54,13 +104,26 @@ export class DockerService {
                 }
             }
 
-            console.log(`Creating container ${containerName} with image ${CONFIG.DOCKER_IMAGE}...`);
+            progressService.emitProgress(workspaceId, "PREPARING", 20, "Allocating cloud resources...");
+            console.log(`Creating container ${containerName} with image ${image}...`);
+
+            // Ensure shared volumes exist
+            for (const vol of Object.values(SHARED_VOLUMES)) {
+                await docker.createVolume({ Name: vol as string }).catch(() => null);
+            }
 
             const createOptions = {
-                Image: CONFIG.DOCKER_IMAGE,
+                Image: image,
                 name: containerName,
                 HostConfig: {
-                    Binds: [`${mountSource}:/home/coder/workspace`],
+                    Binds: [
+                        `${mountSource}:/home/coder/workspace`,
+                        `${SHARED_VOLUMES.PNPM_STORE}:/home/coder/.local/share/pnpm/store`,
+                        `${SHARED_VOLUMES.PIP_CACHE}:/home/coder/.cache/pip`,
+                        `${SHARED_VOLUMES.CARGO_CACHE}:/home/coder/.cargo`,
+                        `${SHARED_VOLUMES.GRADLE_CACHE}:/home/coder/.gradle`,
+                        `${SHARED_VOLUMES.MAVEN_REPO}:/home/coder/.m2`
+                    ],
                     PortBindings: {
                         [`${CONFIG.CONTAINER_PORT}/tcp`]: [{ HostPort: "" }], // Dynamic port
                     },
@@ -73,6 +136,7 @@ export class DockerService {
                     "PASSWORD=", // Empty to disable strict auth logic if any
                 ],
                 Cmd: [
+                    "/app/code-server/bin/code-server",
                     "--auth", "none",
                     "--bind-addr", `0.0.0.0:${CONFIG.CONTAINER_PORT}`,
                     "/home/coder/workspace"
@@ -97,10 +161,11 @@ export class DockerService {
                     (err.json?.message?.includes("No such image") || err.reason === "no such image" || err.message?.includes("No such image"));
 
                 if (isMissingImage) {
-                    console.log(`Image ${CONFIG.DOCKER_IMAGE} not found. Pulling...`);
+                    progressService.emitProgress(workspaceId, "PREPARING", 30, "Downloading core engine components (first-time setup only)...");
+                    console.log(`Image ${image} not found. Pulling...`);
                     // Pull image logic
                     await new Promise((resolve, reject) => {
-                        docker.pull(CONFIG.DOCKER_IMAGE, (err: any, stream: any) => {
+                        docker.pull(image, (err: any, stream: any) => {
                             if (err) return reject(err);
                             // Follow progress
                             docker.modem.followProgress(stream, onFinished, onProgress);
@@ -110,7 +175,10 @@ export class DockerService {
                                 resolve(output);
                             }
                             function onProgress(event: any) {
-                                // console.log(event); // Optional: log progress
+                                if (event.status === "Downloading") {
+                                    const pct = event.progressDetail?.current ? Math.round((event.progressDetail.current / event.progressDetail.total) * 40) + 30 : 35;
+                                    progressService.emitProgress(workspaceId, "PREPARING", pct, `Downloading engine: ${event.id || ""}`);
+                                }
                             }
                         });
                     });
@@ -126,7 +194,7 @@ export class DockerService {
     }
 
     static async startContainer(workspaceId: string) {
-        const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
         if (!workspace) throw new Error("Workspace not found");
 
         const containerName = `ccw-${workspaceId}`;
@@ -154,19 +222,26 @@ export class DockerService {
 
         const freshData = await container.inspect();
         if (!freshData.State.Running) {
+            progressService.emitProgress(workspaceId, "STARTING", 75, "Waking up container...");
             console.log(`Starting container ${containerName}...`);
             await container.start();
+            // Wait for container to be actually running before attempting exec
+            await this.waitForContainerRunning(workspaceId);
+
             // Wait for code-server to initialize
+            progressService.emitProgress(workspaceId, "STARTING", 85, "Booting IDE services...");
             console.log(`Waiting for code-server to initialize...`);
             await new Promise(resolve => setTimeout(resolve, 5000));
 
             // Check if we need to clone the repository into the volume
             if (workspace.repoUrl) {
                 try {
+                    progressService.emitProgress(workspaceId, "CLONING", 90, "Fetching your codebase...");
                     console.log(`Checking if repository clone is needed...`);
                     const checkExec = await container.exec({
                         Cmd: ['sh', '-c', 'ls -A /home/coder/workspace | grep -v "lost+found"'],
                         AttachStdout: true,
+                        User: 'abc'
                     });
                     const checkStream = await checkExec.start({});
                     let output = "";
@@ -184,50 +259,99 @@ export class DockerService {
                         const cloneExec = await container.exec({
                             Cmd: ['git', 'clone', cloneUrl, '/home/coder/workspace'],
                             AttachStdout: true,
-                            AttachStderr: true
+                            AttachStderr: true,
+                            User: 'abc'
                         });
                         const cloneStream = await cloneExec.start({});
                         await new Promise((resolve) => {
-                            cloneStream.on('data', chunk => console.log(`[Clone] ${chunk.toString().trim()}`));
+                            cloneStream.on('data', chunk => {
+                                const out = chunk.toString().trim();
+                                if (out) progressService.emitProgress(workspaceId, "CLONING", 92, `Git: ${out.slice(0, 50)}...`);
+                                console.log(`[Clone] ${out}`);
+                            });
                             cloneStream.on('end', resolve);
                         });
                         console.log(`Repository cloned successfully.`);
                     }
 
-                    // Auto-stack Setup
-                    console.log(`[DockerService] Detecting project stack for ${workspaceId}...`);
-                    const setupCmd = `
-                        if [ -f "/home/coder/workspace/package.json" ]; then
-                            echo "Node.js project detected."
-                            if ! command -v node > /dev/null; then
-                                curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && apt-get install -y nodejs
-                            fi
-                        fi
-                        if [ -f "/home/coder/workspace/Cargo.toml" ]; then
-                            echo "Rust project detected."
-                            if ! command -v cargo > /dev/null; then
-                                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                                export PATH="$HOME/.cargo/bin:$PATH"
-                            fi
-                        fi
-                        if [ -f "/home/coder/workspace/go.mod" ]; then
-                            echo "Go project detected."
-                            if ! command -v go > /dev/null; then
-                                apt-get update && apt-get install -y golang-go
-                            fi
-                        fi
-                    `;
+                    // Auto-stack Bootstrap
+                    let currentStack = workspace.stack;
+                    if (!currentStack) {
+                        console.log(`[DockerService] Stack is missing for ${workspaceId}, attempting detection...`);
+                        try {
+                            const detectExec = await container.exec({
+                                Cmd: ['sh', '-c', 'ls -A /home/coder/workspace'],
+                                AttachStdout: true,
+                            });
+                            const detectStream = await detectExec.start({});
+                            let detectOutput = "";
+                            await new Promise((resolve) => {
+                                detectStream.on('data', chunk => detectOutput += chunk.toString());
+                                detectStream.on('end', resolve);
+                            });
+                            const { detectStack } = await import("../lib/stack-detector");
+                            currentStack = detectStack(detectOutput.split("\n"));
+                            await prisma.workspace.update({ where: { id: workspaceId }, data: { stack: currentStack } as any });
+                        } catch (e) {
+                            console.warn(`[DockerService] Fallback detection failed:`, e);
+                        }
+                    }
 
-                    const setupExec = await container.exec({
-                        Cmd: ['sh', '-c', setupCmd],
-                        AttachStdout: true,
-                        AttachStderr: true
-                    });
-                    const setupStream = await setupExec.start({});
-                    await new Promise((resolve) => {
-                        setupStream.on('data', chunk => console.log(`[Setup] ${chunk.toString().trim()}`));
-                        setupStream.on('end', resolve);
-                    });
+                    progressService.emitProgress(workspaceId, "BOOTSTRAPPING", 95, `Optimizing environment for ${currentStack}...`);
+                    console.log(`[DockerService] Bootstrapping workspace for stack: ${currentStack}...`);
+                    let bootstrapCmd = "";
+                    switch (currentStack) {
+                        case "node":
+                            // Install Node.js if missing, then pnpm/yarn/npm install
+                            bootstrapCmd = "if ! command -v node >/dev/null; then apt-get update && apt-get install -y nodejs npm && npm install -g pnpm yarn; fi && if [ -f package.json ]; then pnpm install --legacy-peer-deps || yarn install || npm install --legacy-peer-deps; fi";
+                            break;
+                        case "rust":
+                            // Install Rust if missing, then cargo build
+                            bootstrapCmd = "if ! command -v cargo >/dev/null; then curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && . $HOME/.cargo/env; fi && if [ -f Cargo.toml ]; then cargo build; fi";
+                            break;
+                        case "python":
+                            // Install Python/pip if missing
+                            bootstrapCmd = "if ! command -v python3 >/dev/null; then apt-get update && apt-get install -y python3 python3-pip python3-venv; fi && if [ -f requirements.txt ]; then pip3 install -r requirements.txt; elif [ -f pyproject.toml ]; then pip3 install .; fi";
+                            break;
+                        case "go":
+                            // Install Go if missing
+                            bootstrapCmd = "if ! command -v go >/dev/null; then apt-get update && apt-get install -y golang-go; fi && if [ -f go.mod ]; then go mod download; fi";
+                            break;
+                        case "java":
+                            bootstrapCmd = "if ! command -v mvn >/dev/null; then apt-get update && apt-get install -y openjdk-17-jdk maven gradle; fi && if [ -f pom.xml ]; then mvn install -DskipTests; elif [ -f build.gradle ]; then ./gradlew build -x test; fi";
+                            break;
+                        case "php":
+                            bootstrapCmd = "if ! command -v php >/dev/null; then apt-get update && apt-get install -y php php-cli composer; fi && if [ -f composer.json ]; then composer install; fi";
+                            break;
+                    }
+
+                    if (bootstrapCmd) {
+                        console.log(`[DockerService] Running bootstrap for ${currentStack}: ${bootstrapCmd}`);
+                        const bootstrapExec = await container.exec({
+                            Cmd: ['sh', '-c', `export PATH="/home/coder/.local/bin:$PATH"; cd /home/coder/workspace && ${bootstrapCmd} && chown -R abc:abc /home/coder/workspace`],
+                            AttachStdout: true,
+                            AttachStderr: true,
+                            User: 'root'
+                        });
+                        const bootstrapStream = await bootstrapExec.start({});
+                        await new Promise((resolve) => {
+                            bootstrapStream.on('data', chunk => {
+                                const output = chunk.toString().trim();
+                                if (output) {
+                                    progressService.emitProgress(workspaceId, "BOOTSTRAPPING", 97, `Setup: ${output.slice(0, 40)}...`);
+                                    console.log(`[Bootstrap Output] ${output}`);
+                                }
+                            });
+                            bootstrapStream.on('end', resolve);
+                        });
+
+                        const { ExitCode } = await bootstrapExec.inspect();
+                        if (ExitCode !== 0) {
+                            console.error(`[DockerService] Bootstrap failed with exit code ${ExitCode}`);
+                        } else {
+                            console.log(`[DockerService] Bootstrap completed successfully`);
+                        }
+                    }
 
                 } catch (cloneErr) {
                     console.error("Failed to setup environment inside container", cloneErr);
@@ -265,6 +389,7 @@ export class DockerService {
             }
         }
 
+        progressService.emitProgress(workspaceId, "COMPLETED", 100, "Environment ready! Finalizing connection...");
         console.log(`Container ${containerName} is running on host port ${port}`);
         return { workspaceId, port };
     }
@@ -360,6 +485,9 @@ export class DockerService {
         const container = docker.getContainer(containerName);
 
         try {
+            // Ensure container is running before exec
+            await this.waitForContainerRunning(workspaceId);
+
             const defaultSettings = {
                 "extensions.autoCheckUpdates": false,
                 "extensions.autoUpdate": false,
@@ -381,7 +509,8 @@ export class DockerService {
             const exec = await container.exec({
                 Cmd: cmd,
                 AttachStdout: true,
-                AttachStderr: true
+                AttachStderr: true,
+                User: 'abc'
             });
 
             await exec.start({});
@@ -389,6 +518,23 @@ export class DockerService {
         } catch (error) {
             console.error(`Failed to create VS Code settings for workspace ${workspaceId}:`, error);
         }
+    }
+
+    static async waitForContainerRunning(workspaceId: string, timeoutMs: number = 30000) {
+        const container = docker.getContainer(`ccw-${workspaceId}`);
+        const start = Date.now();
+
+        while (Date.now() - start < timeoutMs) {
+            const data = await container.inspect();
+            if (data.State.Running && !data.State.Restarting) {
+                return;
+            }
+            if (!data.State.Restarting && data.State.Status === "exited") {
+                throw new Error(`Container exited with code ${data.State.ExitCode}`);
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        throw new Error(`Timeout waiting for container ${workspaceId} to be running`);
     }
 
     static async cleanupStaleContainers() {

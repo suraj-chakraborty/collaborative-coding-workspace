@@ -8,6 +8,7 @@ import cors from "cors";
 import rateLimit from "express-rate-limit"; // Rate limiting
 import { DockerService } from "./services/docker";
 import { proxyRequestHandler, proxy, getContainerPort } from "./services/proxy";
+import { progressService } from "./services/progress";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 import { prisma } from "./lib/prisma";
 
@@ -103,6 +104,19 @@ const startServer = async () => {
         } catch (error: any) {
             res.status(500).json({ error: error.message });
         }
+    });
+
+    app.get("/api/workspaces/:id/setup-status", (req, res) => {
+        const workspaceId = req.params.id;
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+        res.flushHeaders();
+
+        progressService.addClient(workspaceId, res);
+
+        // Initial heartbeat
+        res.write(`data: ${JSON.stringify({ stage: "CONNECTING", progress: 0, message: "Establishing stream..." })}\n\n`);
     });
 
     // File System Routes

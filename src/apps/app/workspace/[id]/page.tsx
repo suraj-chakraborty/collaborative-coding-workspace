@@ -51,6 +51,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const [isRestarting, setIsRestarting] = useState(false);
     const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; action?: string } | null>(null);
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [progress, setProgress] = useState(0);
+    const [devTip, setDevTip] = useState("");
     const [viewMode, setViewMode] = useState<"cloud" | "collab">("collab");
     const router = useRouter();
 
@@ -128,7 +130,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         if (err.includes("no such image")) {
             return {
                 title: "Docker Image Not Found",
-                message: "The code-server image is being downloaded. This usually takes 1-3 minutes on the first run.",
+                message: "The core engine components are being downloaded. This usually takes 1-3 minutes on the first run.",
                 action: "Please wait or refresh in a moment..."
             };
         }
@@ -160,28 +162,49 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         };
     };
 
+    const devTips = [
+        "Lingo.dev Tip: You can switch between Spanish, French, and Hindi using the globe icon.",
+        "Architecture: Your environment is powered by isolated Docker containers for maximum security.",
+        "Pro Tip: Use the 'Collaborative' mode to code with your team in real-time.",
+        "Caching: We cache your dependencies in shared volumes to make future setups lightning fast.",
+        "Cloud IDE: The 'Cloud IDE' mode gives you a full VS Code experience in the browser.",
+        "Lingo.dev fact: Our translation compiler automatically picks up new strings during the build.",
+        "Performance: We allocate dedicated CPU and Memory for each workspace environment."
+    ];
+
     useEffect(() => {
         if (containerStatus === "STARTING") {
-            const stages = [
-                "Preparing engine...",
-                "Allocating resources...",
-                "Pulling dependencies...",
-                "Starting code-server...",
-                "Mounting workspace...",
-                "Almost there..."
-            ];
+            const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/workspaces/${id}/setup-status`);
 
-            let currentStage = 0;
-            const interval = setInterval(() => {
-                if (currentStage < stages.length) {
-                    setLoadingStage(stages[currentStage]);
-                    currentStage++;
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.progress) setProgress(data.progress);
+                if (data.message) setLoadingStage(data.message);
+
+                if (data.stage === "COMPLETED") {
+                    eventSource.close();
                 }
-            }, 1500);
+            };
 
-            return () => clearInterval(interval);
+            eventSource.onerror = () => {
+                eventSource.close();
+            };
+
+            // Dev tips rotation
+            setDevTip(devTips[Math.floor(Math.random() * devTips.length)]);
+            const tipInterval = setInterval(() => {
+                setDevTip(prev => {
+                    const next = devTips[Math.floor(Math.random() * devTips.length)];
+                    return next === prev ? devTips[(devTips.indexOf(next) + 1) % devTips.length] : next;
+                });
+            }, 5000);
+
+            return () => {
+                eventSource.close();
+                clearInterval(tipInterval);
+            };
         }
-    }, [containerStatus]);
+    }, [containerStatus, id]);
 
     useEffect(() => {
         if (data?.workspace) {
@@ -211,7 +234,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     );
 
     return (
-        <div className="flex h-screen flex-col bg-zinc-950 overflow-hidden text-zinc-300">
+        <div className="flex h-screen w-screen flex-col bg-zinc-950 overflow-hidden text-zinc-300">
             {/* Header */}
             <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 bg-zinc-900 px-4">
                 <div className="flex items-center gap-4">
@@ -348,17 +371,20 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                                 <h3 className="text-lg font-medium text-zinc-200 mb-2">Initializing Cloud Environment</h3>
                                 <p className="text-sm text-zinc-400 mb-6">{loadingStage || "Preparing workspace..."}</p>
 
-                                <div className="w-64 h-1.5 bg-zinc-800 rounded-full overflow-hidden border border-white/5">
-                                    <div className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 animate-[loading_2s_ease-in-out_infinite]" />
+                                <div className="w-64 h-2 bg-zinc-800 rounded-full overflow-hidden border border-white/5 mb-8">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500 ease-out"
+                                        style={{ width: `${progress}%` }}
+                                    />
                                 </div>
 
-                                <style jsx>{`
-                                    @keyframes loading {
-                                        0% { width: 0%; margin-left: 0%; }
-                                        50% { width: 50%; margin-left: 25%; }
-                                        100% { width: 0%; margin-left: 100%; }
-                                    }
-                                `}</style>
+                                <div className="max-w-md px-8 py-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-700">
+                                    <p className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mb-2 text-center">While you wait...</p>
+                                    <p className="text-sm text-zinc-300 text-center italic leading-relaxed">
+                                        "{devTip}"
+                                    </p>
+                                </div>
+
                             </div>
                         )}
                     </div>

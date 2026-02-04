@@ -23,7 +23,7 @@ export function CustomIDE({ workspaceId, socketUrl }: CustomIDEProps) {
         <div className="h-full w-full bg-zinc-950 overflow-hidden flex flex-col">
             <ResizablePanelGroup orientation="horizontal" className="flex-1">
                 {/* File Explorer */}
-                <ResizablePanel defaultSize={100} minSize={0} maxSize={200}>
+                <ResizablePanel defaultSize={100} minSize={0} maxSize={400}>
                     <FileExplorer
                         workspaceId={workspaceId}
                         onFileSelect={(path) => setSelectedFile(path)}

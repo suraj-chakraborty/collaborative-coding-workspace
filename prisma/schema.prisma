@@ -44,6 +44,7 @@ model Workspace {
   repoPath    String?
   hostingType HostingType @default(CLOUD)
   localPort   Int?
+  stack       String?
   
   ownerId     String
   owner       User     @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
