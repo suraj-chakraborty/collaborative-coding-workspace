@@ -46,7 +46,9 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
                     terminalRef.current &&
                     terminalRef.current.offsetWidth > 0 &&
                     terminalRef.current.offsetHeight > 0 &&
-                    term.element && (term as any)._core?.viewport // Extra guard for xterm internals
+                    term.element &&
+                    (term as any)._core?._renderService &&
+                    (term as any)._core?._charMeasure?.dimensions // Explicitly check dimensions
                 ) {
                     try {
                         fitAddon.fit();
@@ -59,14 +61,26 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
 
         resizeObserver.observe(terminalRef.current);
 
-        // Initial fit
-        const timeoutId = setTimeout(() => {
-            if (terminalRef.current && terminalRef.current.offsetWidth > 0 && term.element) {
+        // Initial fit with better retry logic
+        const tryFit = (retries = 10) => {
+            if (
+                terminalRef.current &&
+                terminalRef.current.offsetWidth > 0 &&
+                term.element &&
+                (term as any)._core?._renderService &&
+                (term as any)._core?._charMeasure?.dimensions
+            ) {
                 try {
                     fitAddon.fit();
-                } catch (e) { }
+                } catch (e) {
+                    if (retries > 0) setTimeout(() => tryFit(retries - 1), 200);
+                }
+            } else if (retries > 0) {
+                setTimeout(() => tryFit(retries - 1), 200);
             }
-        }, 200);
+        };
+
+        tryFit();
 
         getToken().then(token => {
             if (!token) return;
@@ -91,7 +105,6 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
         });
 
         return () => {
-            clearTimeout(timeoutId);
             resizeObserver.disconnect();
             socketRef.current?.disconnect();
             term.dispose();

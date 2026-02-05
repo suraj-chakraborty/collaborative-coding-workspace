@@ -38,6 +38,7 @@ const MY_WORKSPACES = gql`
 
 export default function DashboardPage() {
     const { user, isLoaded } = useUser();
+    const [searchQuery, setSearchQuery] = useState("");
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -49,7 +50,11 @@ export default function DashboardPage() {
         skip: !user?.primaryEmailAddress?.emailAddress
     }) as any;
 
-    const workspaces = data?.myWorkspaces || [];
+    const allWorkspaces = data?.myWorkspaces || [];
+    const filteredWorkspaces = allWorkspaces.filter((ws: any) =>
+        ws.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ws.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className="flex min-h-screen bg-background">
@@ -66,8 +71,8 @@ export default function DashboardPage() {
                 <nav className="space-y-1 p-4">
                     {[
                         { label: "Dashboard", icon: LayoutDashboard, active: true },
-                        { label: "Workspaces", icon: Terminal },
-                        { label: "Settings", icon: Settings },
+                        // { label: "Workspaces", icon: Terminal },
+                        // { label: "Settings", icon: Settings },
                     ].map((item, i) => (
                         <div
                             key={i}
@@ -88,6 +93,8 @@ export default function DashboardPage() {
                         <input
                             type="text"
                             placeholder="Search workspaces..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className="h-10 w-full rounded-full border border-white/5 bg-white/5 pl-10 pr-4 text-sm focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/50"
                         />
                     </div>
@@ -118,7 +125,7 @@ export default function DashboardPage() {
                         </div>
                     ) : (
                         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                            {workspaces.map((ws: any) => {
+                            {filteredWorkspaces.map((ws: any) => {
                                 const activeInvite = ws.invites?.find((inv: any) => !inv.isRevoked);
                                 const isOwner = ws.ownerId === user?.id;
 
@@ -206,7 +213,7 @@ export default function DashboardPage() {
                             })}
 
                             {/* Empty State */}
-                            {workspaces.length === 0 && (
+                            {filteredWorkspaces.length === 0 && (
                                 <div className="col-span-full flex h-64 flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.01]">
                                     <PlusCircle className="h-12 w-12 text-muted-foreground/50" />
                                     <p className="mt-4 text-muted-foreground">No workspaces found. Create your first one to get started.</p>

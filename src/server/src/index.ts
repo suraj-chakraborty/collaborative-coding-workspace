@@ -17,6 +17,7 @@ import { expressMiddleware } from "@as-integrations/express4";
 import { typeDefs, resolvers } from "./graphql/schema";
 import { filesRouter } from "./routes/files";
 import { uploadRouter } from "./routes/upload";
+import { translateRouter } from "./routes/translate";
 import { serve } from "inngest/express";
 import { inngest } from "./lib/inngest";
 import { setupWorkspace } from "./inngest/functions";
@@ -52,7 +53,7 @@ const startServer = async () => {
         windowMs: 15 * 60 * 1000, // 15 minutes
         max: 500, // Limit each IP to 500 requests per windowMs
     });
-    app.use(limiter);
+    app.use(limiter as any);
 
     app.use(
         "/graphql",
@@ -129,6 +130,9 @@ const startServer = async () => {
 
     // File System Routes
     app.use("/api/files", filesRouter);
+
+    // Translation Routes
+    app.use("/api/translate", translateRouter);
 
     // Proxy routes for the IDE
     app.all("/ws/:id*", (req, res) => {

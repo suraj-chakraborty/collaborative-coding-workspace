@@ -1,0 +1,35 @@
+name: Lingo.dev Sync
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lingo.dev Sync
+        env:
+          LINGO_API_KEY: ${{ secrets.LINGO_API_KEY }}
+        run: |
+          npx -y @lingo.dev/cli push

@@ -3,7 +3,20 @@
         "en",
         "es",
         "fr",
-        "hi"
+        "hi",
+        "de",
+        "zh",
+        "ja",
+        "ko",
+        "pt",
+        "ru",
+        "ar",
+        "it",
+        "bn"
     ],
-    "defaultLocale": "en"
+    "defaultLocale": "en",
+    "include": [
+        "src/app/**/*.{ts,tsx}",
+        "src/components/**/*.{ts,tsx}"
+    ]
 }

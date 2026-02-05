@@ -35,9 +35,18 @@ import {
 // In a real APP, this would call a translation API.
 const translate = async (text: string, sourceLang: string, targetLang: string) => {
     if (sourceLang === targetLang) return text;
-    // Simulate async translation
-    await new Promise(r => setTimeout(r, 100));
-    return `[${targetLang}] ${text}`;
+    try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/translate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, from: sourceLang, to: targetLang }),
+        });
+        const data = await res.json();
+        return data.translated || text;
+    } catch (err) {
+        console.error("Translation error:", err);
+        return text;
+    }
 };
 
 interface Message {
