@@ -2,17 +2,20 @@
 
 import { useEffect, useState, use } from "react";
 import { Button } from "@/components/ui/button";
-import { Terminal, ChevronLeft, Settings, Loader2, MessageSquare, RotateCw, AlertCircle, Trash2, Mic, Phone } from "lucide-react";
+import { Terminal, ChevronLeft, Settings, Loader2, MessageSquare, RotateCw, AlertCircle, Trash2, Mic, Phone, Users } from "lucide-react";
 import Link from "next/link";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { gql } from "@apollo/client";
-import { useUser } from "@clerk/nextjs";
+import { useUser, useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { io } from "socket.io-client";
 import { ChatSidebar } from "@/components/editor/ChatSidebar";
 import { VoiceChatPanel } from "@/components/workspace/voice-chat";
+import { FriendsModal } from "@/components/workspace/FriendsModal";
 import { CustomIDE } from "@/components/editor/CustomIDE";
-import { Layout, Globe } from "lucide-react";
+import { CallSystem } from "@/components/workspace/CallSystem";
+import { Layout, Globe, Video } from "lucide-react";
 
 const GET_WORKSPACE = gql`
   query GetWorkspace($id: String!) {
@@ -42,9 +45,17 @@ const DELETE_WORKSPACE = gql`
   }
 `;
 
+const REMOVE_MEMBER = gql`
+  mutation RemoveMember($workspaceId: String!, $userId: String!, $adminId: String!) {
+    removeMember(workspaceId: $workspaceId, userId: $userId, adminId: $adminId)
+  }
+`;
+
 export default function WorkspacePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { user } = useUser();
+    const { getToken } = useAuth();
+    const [token, setToken] = useState<string | null>(null);
     const [containerStatus, setContainerStatus] = useState<"IDLE" | "STARTING" | "RUNNING" | "ERROR">("IDLE");
     const [loadingStage, setLoadingStage] = useState<string>("");
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -55,13 +66,28 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const [devTip, setDevTip] = useState("");
     const [viewMode, setViewMode] = useState<"cloud" | "collab">("collab");
     const [unreadCount, setUnreadCount] = useState(0);
+    const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false);
+    const [socket, setSocket] = useState<any>(null);
+    const [isVoiceActive, setIsVoiceActive] = useState(false);
+    const [callMode, setCallMode] = useState<"video" | "audio">("video");
     const router = useRouter();
 
     const [deleteWorkspace] = useMutation(DELETE_WORKSPACE);
+    const [removeMember] = useMutation(REMOVE_MEMBER, {
+        refetchQueries: [{ query: GET_WORKSPACE, variables: { id } }]
+    });
 
-    const { data, loading, error } = useQuery(GET_WORKSPACE, {
+    const { data, loading, error, refetch } = useQuery(GET_WORKSPACE, {
         variables: { id },
     }) as any;
+
+    const socketUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001";
+
+    useEffect(() => {
+        if (user) {
+            getToken().then(setToken);
+        }
+    }, [user, getToken]);
 
     const startContainer = async () => {
         setContainerStatus("STARTING");
@@ -174,6 +200,39 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     ];
 
     useEffect(() => {
+        if (!token || !id) return;
+
+        const newSocket = io(socketUrl, {
+            auth: { token }
+        });
+        setSocket(newSocket);
+
+        newSocket.on("connect", () => {
+            console.log(`WorkspacePage: Joined workspace room ${id}`);
+            newSocket.emit("join-workspace", id);
+        });
+
+        newSocket.on("member-joined", (data) => {
+            console.log("WorkspacePage: Member joined, refetching...", data);
+            refetch();
+            toast.info(`${data.name} joined the workspace!`);
+        });
+
+        newSocket.on("user-kicked", (data: { workspaceId: string; userId: string }) => {
+            console.log("WorkspacePage: User kicked", data);
+            if (data.workspaceId === id && data.userId === user?.id) {
+                toast.error("You have been removed from this workspace");
+                router.push("/dashboard");
+            }
+        });
+
+        return () => {
+            newSocket.disconnect();
+            setSocket(null);
+        };
+    }, [token, id, socketUrl, refetch, user?.id, router]);
+
+    useEffect(() => {
         if (containerStatus === "STARTING") {
             const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/workspaces/${id}/setup-status`);
 
@@ -210,37 +269,45 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     useEffect(() => {
         if (data?.workspace) {
             startContainer();
+            // Automatically show friends modal during initialization
+            setIsFriendsModalOpen(true);
         }
     }, [data?.workspace]);
 
     const workspace = data?.workspace;
     const myMember = workspace?.members.find((m: any) => m.user.id === user?.id);
     const isOwner = workspace?.ownerId === user?.id || myMember?.role === "OWNER";
-    const socketUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001";
 
-    if (loading) return (
-        <div className="flex h-screen items-center justify-center bg-zinc-950">
-            <Loader2 className="h-10 w-10 animate-spin text-indigo-500" />
-            <p className="ml-4 text-zinc-400">Loading Environment...</p>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-[#0a0a0a] text-zinc-100">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="h-10 w-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-500">Loading Workspace...</p>
+                </div>
+            </div>
+        );
+    }
 
-    if (error || !workspace) return (
-        <div className="flex h-screen flex-col items-center justify-center bg-zinc-950 text-white">
-            <h1 className="text-2xl font-bold">Workspace not found</h1>
-            <Link href="/dashboard" className="mt-4">
-                <Button>Back to Dashboard</Button>
-            </Link>
-        </div>
-    );
+    if (error || !workspace) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#0a0a0a] text-zinc-100 p-6 text-center">
+                <AlertCircle className="h-12 w-12 text-red-500 mb-4 opacity-80" />
+                <h2 className="text-xl font-bold mb-2">Workspace Not Found</h2>
+                <p className="text-zinc-500 max-w-md mb-8">This workspace may have been deleted or you may not have permission to view it.</p>
+                <Button onClick={() => router.push("/dashboard")} className="bg-indigo-600 hover:bg-indigo-700">
+                    Back to Dashboard
+                </Button>
+            </div>
+        );
+    }
 
     return (
-        <div className="flex h-screen w-screen flex-col bg-zinc-950 overflow-hidden text-zinc-300">
-            {/* Header */}
-            <header className="flex h-12 shrink-0 items-center justify-between border-b border-white/10 bg-zinc-900 px-4">
+        <div className="h-screen w-screen flex flex-col bg-[#0a0a0a] text-zinc-100 overflow-hidden font-sans">
+            <header className="h-14 border-b border-white/5 bg-[#0d0d0d]/80 backdrop-blur-md flex items-center justify-between px-4 shrink-0 z-50">
                 <div className="flex items-center gap-4">
                     <Link href="/dashboard">
-                        <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-white/5">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white">
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                     </Link>
@@ -271,7 +338,38 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
 
                     <div className="h-4 w-[1px] bg-white/10 mx-1" />
 
-                    <div className="flex bg-black/40 p-1 rounded-md border border-white/5">
+                    <div className="flex bg-black/40 p-1 rounded-md border border-white/5 items-center gap-1">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => { setCallMode("audio"); setIsVoiceActive(true); }}
+                            className={`h-7 w-7 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-400/10 ${isVoiceActive && callMode === "audio" ? "text-emerald-400 bg-emerald-400/10" : ""}`}
+                            title="Audio Call"
+                        >
+                            <Phone className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => { setCallMode("video"); setIsVoiceActive(true); }}
+                            className={`h-7 w-7 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-400/10 ${isVoiceActive && callMode === "video" ? "text-indigo-400 bg-indigo-400/10" : ""}`}
+                            title="Video Call"
+                        >
+                            <Video className="h-3.5 w-3.5" />
+                        </Button>
+
+                        <div className="w-[1px] h-4 bg-white/10 mx-1" />
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsFriendsModalOpen(true)}
+                            className={`h-7 px-3 text-[10px] uppercase tracking-tighter transition-all text-zinc-500 hover:text-zinc-300`}
+                        >
+                            <Users className="h-3 w-3 mr-1.5" />
+                            Friends
+                        </Button>
+                        <div className="w-[1px] h-4 bg-white/10 my-1.5 mx-1" />
                         <Button
                             variant="ghost"
                             size="sm"
@@ -291,8 +389,6 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                             Cloud IDE
                         </Button>
                     </div>
-
-
 
                     {isOwner && (
                         <Button
@@ -316,7 +412,6 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 </div>
             </header>
 
-            {/* Main Area - Docker Environment or Custom IDE */}
             <div className="flex flex-1 overflow-hidden relative">
                 {containerStatus === "RUNNING" ? (
                     viewMode === "cloud" ? (
@@ -345,18 +440,10 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                                     </p>
                                 )}
                                 <div className="flex gap-3">
-                                    <Button
-                                        onClick={startContainer}
-                                        variant="default"
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-8"
-                                    >
+                                    <Button onClick={startContainer} variant="default" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8">
                                         Try Reconnect
                                     </Button>
-                                    <Button
-                                        onClick={restartContainer}
-                                        variant="outline"
-                                        className="border-white/10 text-white px-8 hover:bg-white/5"
-                                    >
+                                    <Button onClick={restartContainer} variant="outline" className="border-white/10 text-white px-8 hover:bg-white/5">
                                         Hard Reset
                                     </Button>
                                 </div>
@@ -371,38 +458,42 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                                 </div>
                                 <h3 className="text-lg font-medium text-zinc-200 mb-2">Initializing Cloud Environment</h3>
                                 <p className="text-sm text-zinc-400 mb-6">{loadingStage || "Preparing workspace..."}</p>
-
                                 <div className="w-64 h-2 bg-zinc-800 rounded-full overflow-hidden border border-white/5 mb-8">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500 ease-out"
-                                        style={{ width: `${progress}%` }}
-                                    />
+                                    <div className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500 ease-out" style={{ width: `${progress}%` }} />
                                 </div>
-
                                 <div className="max-w-md px-8 py-4 bg-indigo-500/5 border border-indigo-500/20 rounded-xl animate-in fade-in slide-in-from-bottom-2 duration-700">
                                     <p className="text-[10px] uppercase tracking-[0.2em] text-indigo-400 font-bold mb-2 text-center">While you wait...</p>
-                                    <p className="text-sm text-zinc-300 text-center italic leading-relaxed">
-                                        "{devTip}"
-                                    </p>
+                                    <p className="text-sm text-zinc-300 text-center italic leading-relaxed">"{devTip}"</p>
                                 </div>
                             </div>
                         )}
                     </div>
                 )}
 
-                {/* Floating Chat Button */}
+                <FriendsModal
+                    isOpen={isFriendsModalOpen}
+                    onClose={() => setIsFriendsModalOpen(false)}
+                    workspaceId={id}
+                    workspaceName={workspace?.name || "Workspace"}
+                    socketUrl={socketUrl}
+                    workspaceMemberIds={workspace?.members.map((m: any) => m.user.id) || []}
+                    isOwner={isOwner}
+                    onRemoveMember={(targetUserId) => {
+                        removeMember({ variables: { workspaceId: id, userId: targetUserId, adminId: user?.id } })
+                            .then(() => toast.success("Member removed"))
+                            .catch(err => toast.error(err.message));
+                    }}
+                />
+
                 {!isChatOpen && (
                     <div className="absolute bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-5 duration-300">
                         <Button
                             size="icon"
                             className="h-14 w-14 rounded-full shadow-2xl bg-indigo-600 hover:bg-indigo-500 transition-all duration-300 hover:scale-105"
-                            onClick={() => {
-                                setIsChatOpen(true);
-                                setUnreadCount(0);
-                            }}
+                            onClick={() => { setIsChatOpen(true); setUnreadCount(0); }}
                         >
                             {unreadCount > 0 && (
-                                <div className="absolute -top-1 -left-1 h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-zinc-950 animate-in zoom-in duration-300 shadow-lg">
+                                <div className="absolute -top-1 -left-1 h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-zinc-950 shadow-lg">
                                     {unreadCount > 9 ? "9+" : unreadCount}
                                 </div>
                             )}
@@ -411,14 +502,23 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                     </div>
                 )}
 
-                {/* Chat Sidebar Overlay */}
                 <ChatSidebar
                     workspaceId={id}
-                    socketUrl={socketUrl}
+                    socket={socket}
                     isOpen={isChatOpen}
                     ownerId={workspace.ownerId}
                     onUnreadCountChange={(count) => setUnreadCount(prev => prev + count)}
                     onClose={() => setIsChatOpen(false)}
+                />
+
+                <CallSystem
+                    workspaceId={id}
+                    user={user}
+                    socket={socket}
+                    isVoiceActive={isVoiceActive}
+                    callMode={callMode}
+                    setIsVoiceActive={setIsVoiceActive}
+                    setCallMode={setCallMode}
                 />
             </div>
         </div>

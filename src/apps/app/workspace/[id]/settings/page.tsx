@@ -64,7 +64,8 @@ export default function WorkspaceSettings({ params }: { params: Promise<{ id: st
     const [deleteWorkspace] = useMutation(DELETE_WORKSPACE);
 
     const workspace = data?.workspace;
-    const isOwner = workspace?.ownerId === user?.id;
+    const myMember = workspace?.members.find((m: any) => m.user.id === user?.id);
+    const isOwner = workspace?.ownerId === user?.id || myMember?.role === "OWNER";
 
     const handleCreateInvite = async () => {
         setIsGenerating(true);

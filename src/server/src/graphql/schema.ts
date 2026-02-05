@@ -53,6 +53,14 @@ export const typeDefs = gql`
     myWorkspaces(email: String!): [Workspace!]!
     workspace(id: String!): Workspace
     workspaceByInvite(code: String!): Workspace
+    myFriends(userId: String!): [Friend!]!
+  }
+
+  type Friend {
+    id: String!
+    name: String
+    image: String
+    email: String!
   }
 
   type Mutation {
@@ -69,6 +77,7 @@ export const typeDefs = gql`
     joinWorkspace(inviteCode: String!, userId: String!, email: String, name: String, image: String): Workspace
     deleteWorkspace(id: String!, userId: String!): Boolean
     createInvite(workspaceId: String!, role: String!, inviterId: String!): WorkspaceInvite
+    removeMember(workspaceId: String!, userId: String!, adminId: String!): Boolean
   }
 `;
 
@@ -120,6 +129,18 @@ export const resolvers = {
                 throw new Error("Invalid or expired invite code");
             }
             return invite.workspace;
+        },
+        myFriends: async (_: any, { userId }: { userId: string }) => {
+            const friendships = await (prisma as any).friendship.findMany({
+                where: { userId },
+                include: { friend: true },
+            });
+            return friendships.map((f: any) => ({
+                id: f.friend.id,
+                name: f.friend.name,
+                image: f.friend.image,
+                email: f.friend.email,
+            }));
         },
     },
     Mutation: {
@@ -214,7 +235,8 @@ export const resolvers = {
         },
         joinWorkspace: async (
             _: any,
-            { inviteCode, userId, email, name, image }: { inviteCode: string; userId: string; email?: string; name?: string; image?: string; }
+            { inviteCode, userId, email, name, image }: { inviteCode: string; userId: string; email?: string; name?: string; image?: string; },
+            { io }: { io: any }
         ) => {
             // First ensure user exists (minimal info, based on clerk)
             // Ideally we'd have name/email from the client here too
@@ -227,21 +249,25 @@ export const resolvers = {
                 throw new Error("Invalid or revoked invite code");
             }
 
-            // Sync user if they don't exist yet
-            await prisma.user.upsert({
-                where: { id: userId },
-                update: {
-                    email: email || undefined,
-                    name: name || undefined,
-                    image: image || undefined
-                },
-                create: {
-                    id: userId,
-                    email: email || `user-${userId}@clerk.com`,
-                    name: name || "New Contributor",
-                    image: image,
-                }
-            });
+            try {
+                // Sync user if they don't exist yet
+                await prisma.user.upsert({
+                    where: { id: userId },
+                    update: {
+                        email: email || undefined,
+                        name: name || undefined,
+                        image: image || undefined
+                    },
+                    create: {
+                        id: userId,
+                        email: email || `user-${userId}@clerk.com`,
+                        name: name || "New Contributor",
+                        image: image,
+                    }
+                });
+            } catch (err) {
+                console.error("joinWorkspace: User upsert failed", err);
+            }
 
             // Check if already a member
             const existingMember = await prisma.workspaceMember.findUnique({
@@ -268,8 +294,40 @@ export const resolvers = {
                     workspaceId: invite.workspaceId,
                     role: invite.role,
                 },
-                include: { workspace: true },
+                include: { workspace: { include: { members: true } } },
             });
+
+            // Emit event to notify existing members to refetch
+            if (io) {
+                console.log(`Mutation: Emitting member-joined for workspace ${invite.workspaceId}`);
+                io.to(invite.workspaceId).emit("member-joined", {
+                    workspaceId: invite.workspaceId,
+                    userId,
+                    name: name || email?.split("@")[0] || "New Member"
+                });
+            }
+
+            // Auto-friend: Create mutual friendships with all existing members
+            const existingMemberIds = member.workspace.members
+                .map(m => (m as any).userId || m.userId)
+                .filter(id => id !== userId);
+
+            for (const memberId of existingMemberIds) {
+                try {
+                    await (prisma as any).friendship.upsert({
+                        where: { userId_friendId: { userId, friendId: memberId } },
+                        update: {},
+                        create: { userId, friendId: memberId },
+                    });
+                    await (prisma as any).friendship.upsert({
+                        where: { userId_friendId: { userId: memberId, friendId: userId } },
+                        update: {},
+                        create: { userId: memberId, friendId: userId },
+                    });
+                } catch (err) {
+                    console.error(`joinWorkspace: Auto-friend failed for ${memberId}`, err);
+                }
+            }
 
             return member.workspace;
         },
@@ -293,6 +351,44 @@ export const resolvers = {
             await prisma.workspace.delete({
                 where: { id },
             });
+            return true;
+        },
+        removeMember: async (
+            _: any,
+            { workspaceId, userId, adminId }: { workspaceId: string; userId: string; adminId: string },
+            { io }: { io: any }
+        ) => {
+            const workspace = await prisma.workspace.findUnique({
+                where: { id: workspaceId },
+                select: { ownerId: true }
+            });
+
+            if (!workspace || workspace.ownerId !== adminId) {
+                throw new Error("Unauthorized: Only the owner can remove members");
+            }
+
+            if (userId === workspace.ownerId) {
+                throw new Error("Owner cannot be removed from their own workspace");
+            }
+
+            await prisma.workspaceMember.delete({
+                where: {
+                    workspaceId_userId: {
+                        workspaceId,
+                        userId,
+                    },
+                },
+            });
+
+            // Emit event to notify the user they have been kicked
+            if (io) {
+                console.log(`Mutation: Emitting user-kicked for user ${userId} from workspace ${workspaceId}`);
+                io.to(userId).emit("user-kicked", {
+                    workspaceId,
+                    userId
+                });
+            }
+
             return true;
         },
     },

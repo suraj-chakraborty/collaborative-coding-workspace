@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { toast } from "sonner";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { VoiceChatPanel } from "@/components/workspace/voice-chat";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { Mic, Phone, PhoneIncoming, Video, Type, Settings, Check, Paperclip, StopCircle, FileText, Download, Heart, Trash, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Mic, Type, Settings, Check, Paperclip, StopCircle, FileText, Download, Heart, Trash, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useLingoContext } from "@lingo.dev/compiler/react";
 import {
     DropdownMenu,
@@ -59,30 +58,24 @@ interface Message {
 
 interface ChatSidebarProps {
     workspaceId: string;
-    socketUrl: string;
+    socket: Socket | null;
     isOpen: boolean;
     ownerId?: string;
     onUnreadCountChange?: (count: number) => void;
     onClose: () => void;
 }
 
-export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadCountChange, onClose }: ChatSidebarProps) {
+export function ChatSidebar({ workspaceId, socket, isOpen, ownerId, onUnreadCountChange, onClose }: ChatSidebarProps) {
     const { user } = useUser();
     const { getToken } = useAuth();
     const { locale } = useLingoContext();
 
-    const [socket, setSocket] = useState<Socket | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const scrollRef = useRef<HTMLDivElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [token, setToken] = useState<string | null>(null);
-    const [isVoiceActive, setIsVoiceActive] = useState(false);
-    const [callMode, setCallMode] = useState<"video" | "audio">("video");
-
     const [chatFontSize, setChatFontSize] = useState<"text-xs" | "text-sm" | "text-base">("text-xs");
     const [translatedMessages, setTranslatedMessages] = useState<Record<string, string>>({});
-    const [incomingCall, setIncomingCall] = useState<{ name: string; image?: string; mode?: "video" | "audio" } | null>(null);
 
     // File/Voice State
     const [isRecording, setIsRecording] = useState(false);
@@ -96,16 +89,11 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
 
     // Refs for socket listeners to avoid re-effects
     const isOpenRef = useRef(isOpen);
-    const isVoiceActiveRef = useRef(isVoiceActive);
     const onUnreadCountChangeRef = useRef(onUnreadCountChange);
 
     useEffect(() => { isOpenRef.current = isOpen; }, [isOpen]);
-    useEffect(() => { isVoiceActiveRef.current = isVoiceActive; }, [isVoiceActive]);
     useEffect(() => { onUnreadCountChangeRef.current = onUnreadCountChange; }, [onUnreadCountChange]);
 
-    useEffect(() => {
-        getToken().then(setToken);
-    }, [getToken]);
 
     const scrollToBottom = () => {
         if (scrollRef.current) {
@@ -114,24 +102,15 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
     };
 
     useEffect(() => {
-        if (!token) return;
+        if (!socket) return;
 
-        const newSocket = io(socketUrl, {
-            auth: { token }
-        });
-        setSocket(newSocket);
 
-        newSocket.on("connect", () => {
-            console.log("Chat connected");
-            newSocket.emit("join-workspace", workspaceId);
-        });
-
-        newSocket.on("chat-history", (history: Message[]) => {
+        socket.on("chat-history", (history: Message[]) => {
             setMessages(history);
             setTimeout(scrollToBottom, 300);
         });
 
-        newSocket.on("chat-message", async (msg: any) => {
+        socket.on("chat-message", async (msg: any) => {
             setMessages((prev) => [...prev, msg]);
 
             if (!isOpenRef.current && onUnreadCountChangeRef.current) {
@@ -146,23 +125,21 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
             setTimeout(scrollToBottom, 100);
         });
 
-        newSocket.on("chat-like", (data: { messageId: string, likes: number }) => {
+        socket.on("chat-like", (data: { messageId: string, likes: number }) => {
             setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, likes: data.likes } : m));
         });
 
-        newSocket.on("chat-delete", (data: { messageId: string }) => {
+        socket.on("chat-delete", (data: { messageId: string }) => {
             setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, isDeleted: true, text: "This message was deleted" } : m));
         });
 
-        newSocket.on("incoming-call", (payload: { caller: { name: string, image?: string }, mode?: "video" | "audio" }) => {
-            if (isVoiceActiveRef.current) return;
-            setIncomingCall({ ...payload.caller, mode: payload.mode || "video" });
-        });
-
         return () => {
-            newSocket.disconnect();
+            socket.off("chat-history");
+            socket.off("chat-message");
+            socket.off("chat-like");
+            socket.off("chat-delete");
         };
-    }, [workspaceId, socketUrl, token, locale]);
+    }, [workspaceId, socket, locale]);
 
     const handleSend = async () => {
         if ((!input.trim() && !uploading) || !socket || !user) return;
@@ -314,44 +291,6 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
 
     return (
         <>
-            <Dialog open={!!incomingCall} onOpenChange={(open) => !open && setIncomingCall(null)}>
-                <DialogContent className="sm:max-w-md bg-zinc-900 border-zinc-800 text-white">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <PhoneIncoming className="h-5 w-5 text-indigo-400 animate-pulse" />
-                            Incoming Call
-                        </DialogTitle>
-                        <DialogDescription className="text-zinc-400">
-                            <span className="font-semibold text-zinc-200">{incomingCall?.name}</span> is inviting you to a voice call.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex items-center justify-center py-6">
-                        <Avatar className="h-20 w-20 ring-4 ring-indigo-500/20">
-                            <AvatarImage src={incomingCall?.image} />
-                            <AvatarFallback className="bg-zinc-800 text-xl">{incomingCall?.name?.[0]}</AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <DialogFooter className="flex gap-2 sm:justify-center">
-                        <Button
-                            variant="outline"
-                            onClick={() => setIncomingCall(null)}
-                            className="border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-300 w-full sm:w-auto"
-                        >
-                            Decline
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                setCallMode(incomingCall?.mode || "video");
-                                setIsVoiceActive(true);
-                                setIncomingCall(null);
-                            }}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white w-full sm:w-auto"
-                        >
-                            Accept & Join {incomingCall?.mode === "audio" ? "(Audio)" : "(Video)"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
 
             <Dialog open={!!selectedImage} onOpenChange={(open) => {
                 if (!open) {
@@ -412,7 +351,7 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
                 </DialogContent>
             </Dialog>
 
-            <div className={"w-80 border-l border-white/10 bg-zinc-900 flex flex-col h-full absolute right-0 top-0 z-50 shadow-2xl transition-transform duration-300 " + (isOpen ? "translate-x-0" : "translate-x-full pointer-events-none")}>
+            <div className={"w-80 border-l border-white/10 bg-zinc-900 flex flex-col h-full absolute right-0 top-0 z-50 shadow-2xl transition-transform duration-300 min-h-0 " + (isOpen ? "translate-x-0" : "translate-x-full pointer-events-none")}>
                 <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20">
                     <div className="flex items-center gap-2 text-zinc-100">
                         <MessageSquare className="h-4 w-4" />
@@ -443,38 +382,6 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
                             </DropdownMenuContent>
                         </DropdownMenu>
 
-                        {isVoiceActive ? (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setIsVoiceActive(false)}
-                                className="h-6 w-6 text-red-400 hover:text-red-300 hover:bg-red-400/10"
-                                title="Leave Call"
-                            >
-                                <Phone className="h-4 w-4" />
-                            </Button>
-                        ) : (
-                            <>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => { setCallMode("audio"); setIsVoiceActive(true); }}
-                                    className="h-6 w-6 text-zinc-400 hover:text-emerald-400"
-                                    title="Start Audio Call"
-                                >
-                                    <Phone className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => { setCallMode("video"); setIsVoiceActive(true); }}
-                                    className="h-6 w-6 text-zinc-400 hover:text-indigo-400"
-                                    title="Start Video Call"
-                                >
-                                    <Video className="h-4 w-4" />
-                                </Button>
-                            </>
-                        )}
 
                         <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6 text-zinc-400 hover:text-white">
                             <X className="h-4 w-4" />
@@ -482,20 +389,7 @@ export function ChatSidebar({ workspaceId, socketUrl, isOpen, ownerId, onUnreadC
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col overflow-hidden relative">
-                    <AnimatePresence initial={false}>
-                        {isVoiceActive && (
-                            <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 200, opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                                className="border-b border-white/10 bg-zinc-950 shadow-2xl relative z-50 shrink-0"
-                            >
-                                <VoiceChatPanel workspaceId={workspaceId} user={user} mode={callMode} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                <div className="flex-1 flex flex-col overflow-hidden relative min-h-0">
 
                     <ScrollArea className="flex-1" ref={scrollContainerRef} type="always">
                         <div className="p-4 space-y-4 pb-4">

@@ -23,6 +23,9 @@ import { setupWorkspace } from "./inngest/functions";
 
 const callInitiators: Record<string, string> = {};
 
+// Track online users globally: userId -> Set of socketIds
+const onlineUsers: Map<string, Set<string>> = new Map();
+
 const startServer = async () => {
     const app = express();
     const server = createServer(app);
@@ -54,7 +57,10 @@ const startServer = async () => {
     app.use(
         "/graphql",
         expressMiddleware(apolloServer, {
-            context: async ({ req }) => ({ token: (req as any).headers.token }),
+            context: async ({ req }) => ({
+                token: (req as any).headers.token,
+                io
+            }),
         }) as any
     );
 
@@ -206,6 +212,67 @@ const startServer = async () => {
     io.on("connection", (socket) => {
         const userId = (socket as any).userId;
         console.log(`User connected: ${userId} (${socket.id})`);
+
+        // Track user connections
+        if (!onlineUsers.has(userId)) {
+            onlineUsers.set(userId, new Set());
+            // Only emit online when the FIRST connection arrives
+            io.emit("user-online", { userId });
+            console.log(`Presence: User ${userId} is now ONLINE (first connection)`);
+        }
+        onlineUsers.get(userId)!.add(socket.id);
+        console.log(`Presence: User ${userId} has ${onlineUsers.get(userId)!.size} active connections`);
+
+        // Join a private room for this user to receive targeted events (like invites)
+        socket.join(userId);
+
+        // Send current online users to newly connected client
+        socket.emit("online-users", Array.from(onlineUsers.keys()));
+
+        socket.on("disconnect", () => {
+            const connections = onlineUsers.get(userId);
+            if (connections) {
+                connections.delete(socket.id);
+                if (connections.size === 0) {
+                    // Only emit offline when the LAST connection disappears
+                    onlineUsers.delete(userId);
+                    io.emit("user-offline", { userId });
+                }
+            }
+            console.log(`User disconnected: ${userId} (${socket.id})`);
+        });
+
+        socket.on("workspace-invite-request", async (data: { targetUserId: string; workspaceId: string; workspaceName: string; inviterName: string }) => {
+            console.log(`INVITE: From ${data.inviterName} (${userId}) to ${data.targetUserId} for workspace ${data.workspaceName}`);
+
+            try {
+                // Generate a one-time invite code for this request
+                const invite = await prisma.workspaceInvite.create({
+                    data: {
+                        workspaceId: data.workspaceId,
+                        inviterId: userId,
+                        code: Math.random().toString(36).substring(2, 10).toUpperCase(),
+                        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+                        role: "EDITOR",
+                    }
+                });
+
+                // Check if target user is actually online
+                const isTargetOnline = onlineUsers.has(data.targetUserId);
+                console.log(`INVITE: Target ${data.targetUserId} is ${isTargetOnline ? "ONLINE" : "OFFLINE"}`);
+
+                // Emit to the target user's private room so ALL their active sockets receive it
+                io.to(data.targetUserId).emit("workspace-invite-received", {
+                    workspaceId: data.workspaceId,
+                    workspaceName: data.workspaceName,
+                    inviterName: data.inviterName,
+                    inviteCode: invite.code,
+                });
+                console.log(`INVITE: Emitted 'workspace-invite-received' with code ${invite.code} to room ${data.targetUserId}`);
+            } catch (err) {
+                console.error("INVITE: Failed to generate invite code", err);
+            }
+        });
 
         socket.on("join-workspace", async (workspaceId: string) => {
             socket.join(`workspace-${workspaceId}`);

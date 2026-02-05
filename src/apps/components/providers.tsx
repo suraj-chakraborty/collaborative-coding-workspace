@@ -6,6 +6,8 @@ import { dark } from "@clerk/themes";
 import { LingoProvider } from "@lingo.dev/compiler/react";
 import { ApolloProvider } from "@apollo/client/react";
 import { ApolloClient, HttpLink, InMemoryCache, gql } from "@apollo/client";
+import { InviteListener } from "@/components/workspace/InviteListener";
+import { Toaster } from "@/components/ui/sonner";
 
 import { useState, useEffect } from "react";
 
@@ -37,7 +39,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
                         {!mounted ? (
                             <div style={{ visibility: "hidden" }}>{children}</div>
                         ) : (
-                            children
+                            <>
+                                <InviteListener />
+                                {children}
+                                <Toaster />
+                            </>
                         )}
                     </ThemeProvider>
                 </ClerkProvider>
