@@ -103,4 +103,7 @@ model ChatMessage {
   fileUrl     String?
   fileType    String?
   fileName    String?
+  
+  likes       Int       @default(0)
+  isDeleted   Boolean   @default(false)
 }

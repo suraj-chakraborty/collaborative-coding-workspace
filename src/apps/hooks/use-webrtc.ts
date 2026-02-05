@@ -6,13 +6,15 @@ import { toast } from "sonner";
 interface PeerUser {
     peerID: string;
     peer: Peer.Instance;
+    name: string;
+    image?: string;
 }
 
 export const useWebRTC = (workspaceId: string, user: any, token: string | null, audioOnly: boolean = false) => {
     const [peers, setPeers] = useState<PeerUser[]>([]);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const socketRef = useRef<Socket | null>(null);
-    const peersRef = useRef<{ peerID: string; peer: Peer.Instance }[]>([]);
+    const peersRef = useRef<PeerUser[]>([]);
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(audioOnly);
 
@@ -21,43 +23,52 @@ export const useWebRTC = (workspaceId: string, user: any, token: string | null, 
 
         let stream: MediaStream | null = null;
 
-        // Initialize socket with token
         socketRef.current = io(process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001", {
             auth: { token }
         });
 
-        // Get User Media
         navigator.mediaDevices
             .getUserMedia({ video: !audioOnly, audio: true })
             .then((s) => {
                 stream = s;
                 setLocalStream(s);
 
-                // Join room
-                socketRef.current?.emit("join-voice-room", workspaceId);
+                socketRef.current?.emit("join-voice-room", workspaceId, audioOnly ? "audio" : "video");
 
-                // Listen for other users
-                socketRef.current?.on("all-users", (users: string[]) => {
+                socketRef.current?.on("all-users", (users: { id: string, name: string, image?: string }[]) => {
                     const peers: PeerUser[] = [];
-                    users.forEach((userID) => {
-                        const peer = createPeer(userID, socketRef.current!.id, s);
-                        peersRef.current.push({ peerID: userID, peer });
-                        peers.push({ peerID: userID, peer });
+                    users.forEach((u) => {
+                        const peer = createPeer(u.id, socketRef.current!.id, s);
+                        const newUser = { peerID: u.id, peer, name: u.name, image: u.image };
+                        peersRef.current.push(newUser);
+                        peers.push(newUser);
                     });
                     setPeers(peers);
                 });
 
-                // Listen for new user joining
-                socketRef.current?.on("user-joined", (payload: { signal: any; callerID: string }) => {
+                socketRef.current?.on("user-joined", (payload: { signal: any; callerID: string; name: string; image?: string }) => {
                     const peer = addPeer(payload.signal, payload.callerID, s);
-                    peersRef.current.push({ peerID: payload.callerID, peer });
-                    setPeers((users) => [...users, { peerID: payload.callerID, peer }]);
+                    const newUser = { peerID: payload.callerID, peer, name: payload.name, image: payload.image };
+                    peersRef.current.push(newUser);
+                    setPeers((users) => [...users, newUser]);
                 });
 
-                // Receive returned signal
                 socketRef.current?.on("receiving-returned-signal", (payload: { signal: any; id: string }) => {
                     const item = peersRef.current.find((p) => p.peerID === payload.id);
                     item?.peer.signal(payload.signal);
+                });
+
+                socketRef.current?.on("user-left", (peerID: string) => {
+                    const peerObj = peersRef.current.find(p => p.peerID === peerID);
+                    if (peerObj) peerObj.peer.destroy();
+                    const filteredPeers = peersRef.current.filter(p => p.peerID !== peerID);
+                    peersRef.current = filteredPeers;
+                    setPeers(filteredPeers);
+                });
+
+                socketRef.current?.on("call-ended", ({ reason }: { reason: string }) => {
+                    toast.info(`Call ended: ${reason === "initiator-left" ? "Initiator left" : "Finished"}`);
+                    leaveCall();
                 });
             })
             .catch((err) => {
@@ -67,11 +78,12 @@ export const useWebRTC = (workspaceId: string, user: any, token: string | null, 
 
         return () => {
             stream?.getTracks().forEach(track => track.stop());
+            socketRef.current?.emit("leave-voice-room", workspaceId);
             socketRef.current?.disconnect();
             peersRef.current.forEach(p => p.peer.destroy());
             peersRef.current = [];
         };
-    }, [workspaceId, token, audioOnly]);
+    }, [workspaceId, token, audioOnly, user]);
 
     function createPeer(userToSignal: string, callerID: string, stream: MediaStream) {
         const peer = new Peer({
@@ -81,7 +93,13 @@ export const useWebRTC = (workspaceId: string, user: any, token: string | null, 
         });
 
         peer.on("signal", (signal) => {
-            socketRef.current?.emit("sending-signal", { userToSignal, callerID, signal });
+            socketRef.current?.emit("sending-signal", {
+                userToSignal,
+                callerID,
+                signal,
+                name: user.fullName || user.name || "Unknown",
+                image: user.imageUrl || user.image
+            });
         });
 
         return peer;
@@ -118,12 +136,22 @@ export const useWebRTC = (workspaceId: string, user: any, token: string | null, 
     }, [localStream]);
 
     const leaveCall = useCallback(() => {
+        socketRef.current?.emit("leave-voice-room", workspaceId);
         localStream?.getTracks().forEach(track => track.stop());
         socketRef.current?.disconnect();
         setPeers([]);
         setLocalStream(null);
-    }, [localStream]);
+    }, [localStream, workspaceId]);
 
+    return {
+        peers,
+        localStream,
+        toggleMute,
+        toggleVideo,
+        leaveCall,
+        isMuted,
+        isVideoOff
+    };
     return {
         peers,
         localStream,

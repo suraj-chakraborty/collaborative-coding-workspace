@@ -24,14 +24,13 @@ router.post("/", async (req, res) => {
         const uniqueName = `${crypto.randomBytes(16).toString("hex")}${ext}`;
         const filePath = path.join(UPLOADS_DIR, uniqueName);
 
-        // Decode Base64 (remove data:audio/webm;base64, prefix if present)
-        const matches = content.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+        // Decode Base64 (remove data: prefix if present)
         let buffer;
-
-        if (matches && matches.length === 3) {
-            buffer = Buffer.from(matches[2], "base64");
+        if (content.includes(";base64,")) {
+            const base64Content = content.split(";base64,")[1];
+            buffer = Buffer.from(base64Content, "base64");
         } else {
-            // Assume raw base64 if no prefix
+            // Fallback for raw base64 or other formats
             buffer = Buffer.from(content, "base64");
         }
 

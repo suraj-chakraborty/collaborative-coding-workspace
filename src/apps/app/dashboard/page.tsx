@@ -123,7 +123,7 @@ export default function DashboardPage() {
                                 const isOwner = ws.ownerId === user?.id;
 
                                 return (
-                                    <Card key={ws.id} className="group relative overflow-hidden border-white/10 bg-zinc-900/50 backdrop-blur-xl transition-all duration-300 hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/20">
+                                    <Card key={ws.id} className="group relative overflow-y-scroll border-white/10 bg-zinc-900/50 backdrop-blur-xl transition-all duration-300 hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/20">
                                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 transition-opacity group-hover:opacity-100" />
 
                                         <CardHeader className="relative pb-4">

@@ -46,7 +46,7 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
                     terminalRef.current &&
                     terminalRef.current.offsetWidth > 0 &&
                     terminalRef.current.offsetHeight > 0 &&
-                    term.element // Ensure terminal is actually attached to DOM
+                    term.element && (term as any)._core?.viewport // Extra guard for xterm internals
                 ) {
                     try {
                         fitAddon.fit();

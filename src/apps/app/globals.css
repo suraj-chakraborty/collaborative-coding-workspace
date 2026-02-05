@@ -119,38 +119,70 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
 /* Yjs Remote Selection Styles */
 .yRemoteSelection {
-    background-color: rgba(99, 102, 241, 0.2);
+  background-color: rgba(99, 102, 241, 0.2);
 }
 
 .yRemoteSelectionHead {
-    position: absolute;
-    border-left: 2px solid var(--y-color);
-    border-top: 2px solid var(--y-color);
-    border-bottom: 2px solid var(--y-color);
-    height: 100%;
-    box-sizing: border-box;
+  position: absolute;
+  border-left: 2px solid var(--y-color);
+  border-top: 2px solid var(--y-color);
+  border-bottom: 2px solid var(--y-color);
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .yRemoteSelectionHead::after {
-    position: absolute;
-    content: attr(data-user);
-    top: -1.4em;
-    left: -2px;
-    padding: 0px 4px;
-    background-color: var(--y-color);
-    color: white;
-    font-size: 10px;
-    font-family: inherit;
-    font-weight: 600;
-    line-height: 1.4em;
-    border-radius: 2px 2px 2px 0;
-    white-space: nowrap;
-    z-index: 10;
+  position: absolute;
+  content: attr(data-user);
+  top: -1.4em;
+  left: -2px;
+  padding: 0px 4px;
+  background-color: var(--y-color);
+  color: white;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  line-height: 1.4em;
+  border-radius: 2px 2px 2px 0;
+  white-space: nowrap;
+  z-index: 10;
 }

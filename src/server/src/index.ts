@@ -21,6 +21,8 @@ import { serve } from "inngest/express";
 import { inngest } from "./lib/inngest";
 import { setupWorkspace } from "./inngest/functions";
 
+const callInitiators: Record<string, string> = {};
+
 const startServer = async () => {
     const app = express();
     const server = createServer(app);
@@ -228,7 +230,12 @@ const startServer = async () => {
                         image: msg.user.image
                     },
                     timestamp: msg.createdAt.getTime(),
-                    lang: "en" // Defaulting since DB doesn't store lang yet, or we could add it.
+                    lang: "en",
+                    fileUrl: msg.fileUrl,
+                    fileType: msg.fileType,
+                    fileName: msg.fileName,
+                    likes: msg.likes,
+                    isDeleted: msg.isDeleted
                 }));
 
                 socket.emit("chat-history", formattedHistory);
@@ -238,21 +245,64 @@ const startServer = async () => {
         });
 
         // Chat Message Event
-        socket.on("chat-message", async (data: { workspaceId: string; message: string; user: any; lang?: string }) => {
-            // Broadcast to everyone in the room INCLUDING sender (for simplicity, or exclude sender)
-            io.to(`workspace-${data.workspaceId}`).emit("chat-message", data);
+        socket.on("chat-message", async (data: { id: string; workspaceId: string; message: string; user: any; lang?: string; fileUrl?: string; fileType?: string; fileName?: string }) => {
+            const msgData = {
+                ...data,
+                likes: 0,
+                isDeleted: false
+            };
+
+            // Broadcast to everyone in the room
+            io.to(`workspace-${data.workspaceId}`).emit("chat-message", msgData);
 
             // Persist message to DB
             try {
                 await prisma.chatMessage.create({
                     data: {
+                        id: data.id,
                         content: data.message,
                         workspaceId: data.workspaceId,
-                        userId: data.user.id
+                        userId: data.user?.id || (data as any).sender?.id,
+                        fileUrl: data.fileUrl,
+                        fileType: data.fileType,
+                        fileName: data.fileName
                     }
                 });
             } catch (err) {
                 console.error("Failed to persist message:", err);
+            }
+        });
+
+        // Chat Like Event
+        socket.on("chat-like", async (data: { workspaceId: string; messageId: string }) => {
+            try {
+                const updatedMsg = await prisma.chatMessage.update({
+                    where: { id: data.messageId },
+                    data: { likes: { increment: 1 } }
+                });
+                io.to(`workspace-${data.workspaceId}`).emit("chat-like", { messageId: data.messageId, likes: updatedMsg.likes });
+            } catch (err) {
+                console.error("Failed to like message:", err);
+            }
+        });
+
+        // Chat Delete Event
+        socket.on("chat-delete", async (data: { workspaceId: string; messageId: string }) => {
+            try {
+                const message = await prisma.chatMessage.findUnique({
+                    where: { id: data.messageId },
+                    include: { workspace: true }
+                });
+
+                if (message && (message.userId === userId || message.workspace.ownerId === userId)) {
+                    await prisma.chatMessage.update({
+                        where: { id: data.messageId },
+                        data: { isDeleted: true, content: "This message was deleted" }
+                    });
+                    io.to(`workspace-${data.workspaceId}`).emit("chat-delete", { messageId: data.messageId });
+                }
+            } catch (err) {
+                console.error("Failed to delete message:", err);
             }
         });
 
@@ -278,7 +328,7 @@ const startServer = async () => {
         });
 
         // WebRTC Signaling Events
-        socket.on("join-voice-room", async (workspaceId: string) => {
+        socket.on("join-voice-room", async (workspaceId: string, mode: "audio" | "video" = "video") => {
             // Access Control: Verify user is a member of the workspace
             try {
                 const member = await prisma.workspaceMember.findUnique({
@@ -315,27 +365,42 @@ const startServer = async () => {
                 // Let's emit an 'incoming-call' event to the WORKSPACE room (not voice room)
                 // alerting them that someone is in the voice channel.
                 const user = await prisma.user.findUnique({ where: { id: userId } });
+
+                if (!callInitiators[workspaceId]) {
+                    callInitiators[workspaceId] = userId;
+                }
+
                 socket.to(`workspace-${workspaceId}`).emit("incoming-call", {
                     workspaceId,
+                    mode,
                     caller: {
                         id: userId,
                         name: user?.name || "Unknown",
                         image: user?.image
-                    }
+                    },
+                    initiatorId: callInitiators[workspaceId]
                 });
 
                 // Notify existing users that new user joined, so they can initiate offers
-                socket.emit("all-users", otherUsers);
+                const userMetas = await Promise.all(otherUsers.map(async id => {
+                    const s = io.sockets.sockets.get(id);
+                    const uid = (s as any).userId;
+                    const u = await prisma.user.findUnique({ where: { id: uid } });
+                    return { id, name: u?.name || "Unknown", image: u?.image };
+                }));
+                socket.emit("all-users", userMetas);
                 console.log(`User ${userId} joined voice room ${workspaceId}`);
             } catch (err) {
                 console.error("Join Room Error:", err);
             }
         });
 
-        socket.on("sending-signal", (payload: { userToSignal: string; signal: any; callerID: string }) => {
+        socket.on("sending-signal", (payload: { userToSignal: string; signal: any; callerID: string; name: string; image?: string }) => {
             io.to(payload.userToSignal).emit("user-joined", {
                 signal: payload.signal,
                 callerID: payload.callerID,
+                name: payload.name,
+                image: payload.image
             });
         });
 
@@ -346,10 +411,38 @@ const startServer = async () => {
             });
         });
 
+        socket.on("leave-voice-room", (workspaceId: string) => {
+            const roomId = `voice-${workspaceId}`;
+            socket.leave(roomId);
+
+            const clients = io.sockets.adapter.rooms.get(roomId);
+            const remainingCount = clients ? clients.size : 0;
+
+            // If initiator leaves, end call for everyone
+            if (callInitiators[workspaceId] === userId) {
+                delete callInitiators[workspaceId];
+                io.to(roomId).emit("call-ended", { reason: "initiator-left" });
+                // Force everyone to leave
+                if (clients) {
+                    for (const clientId of clients) {
+                        const clientSocket = io.sockets.sockets.get(clientId);
+                        clientSocket?.leave(roomId);
+                    }
+                }
+            } else if (remainingCount === 1) {
+                // If only one person left (and initiator already left or this was a 2-person call), end it
+                delete callInitiators[workspaceId];
+                io.to(roomId).emit("call-ended", { reason: "last-person-left" });
+            } else {
+                // Just notify others that someone left
+                socket.to(roomId).emit("user-left", socket.id);
+            }
+        });
+
         socket.on("disconnect", () => {
             console.log("User disconnected:", socket.id);
-            // Notify rooms this user was in (cleanup not trivial without tracking room membership, 
-            // but for mesh, peers usually detect disconnect via ICE connection state)
+            // We'd ideally want to trigger leave-voice-room for all rooms they were in
+            // For now, simple mesh fallback or more complex tracking.
         });
     });
 

@@ -54,6 +54,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const [progress, setProgress] = useState(0);
     const [devTip, setDevTip] = useState("");
     const [viewMode, setViewMode] = useState<"cloud" | "collab">("collab");
+    const [unreadCount, setUnreadCount] = useState(0);
     const router = useRouter();
 
     const [deleteWorkspace] = useMutation(DELETE_WORKSPACE);
@@ -384,33 +385,42 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                                         "{devTip}"
                                     </p>
                                 </div>
-
                             </div>
                         )}
                     </div>
                 )}
+
+                {/* Floating Chat Button */}
+                {!isChatOpen && (
+                    <div className="absolute bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-5 duration-300">
+                        <Button
+                            size="icon"
+                            className="h-14 w-14 rounded-full shadow-2xl bg-indigo-600 hover:bg-indigo-500 transition-all duration-300 hover:scale-105"
+                            onClick={() => {
+                                setIsChatOpen(true);
+                                setUnreadCount(0);
+                            }}
+                        >
+                            {unreadCount > 0 && (
+                                <div className="absolute -top-1 -left-1 h-6 w-6 bg-red-500 rounded-full flex items-center justify-center text-[10px] font-bold text-white border-2 border-zinc-950 animate-in zoom-in duration-300 shadow-lg">
+                                    {unreadCount > 9 ? "9+" : unreadCount}
+                                </div>
+                            )}
+                            <MessageSquare className="h-6 w-6 text-white" />
+                        </Button>
+                    </div>
+                )}
+
+                {/* Chat Sidebar Overlay */}
+                <ChatSidebar
+                    workspaceId={id}
+                    socketUrl={socketUrl}
+                    isOpen={isChatOpen}
+                    ownerId={workspace.ownerId}
+                    onUnreadCountChange={(count) => setUnreadCount(prev => prev + count)}
+                    onClose={() => setIsChatOpen(false)}
+                />
             </div>
-
-            {/* Floating Chat Button */}
-            {!isChatOpen && (
-                <div className="absolute bottom-6 right-6 z-[60] animate-in slide-in-from-bottom-5 duration-300">
-                    <Button
-                        size="icon"
-                        className="h-14 w-14 rounded-full shadow-2xl bg-indigo-600 hover:bg-indigo-500 transition-all duration-300 hover:scale-105"
-                        onClick={() => setIsChatOpen(true)}
-                    >
-                        <MessageSquare className="h-6 w-6 text-white" />
-                    </Button>
-                </div>
-            )}
-
-            {/* Chat Sidebar Overlay */}
-            <ChatSidebar
-                workspaceId={id}
-                socketUrl={socketUrl}
-                isOpen={isChatOpen}
-                onClose={() => setIsChatOpen(false)}
-            />
         </div>
     );
 }

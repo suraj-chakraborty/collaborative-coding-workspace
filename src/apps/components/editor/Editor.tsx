@@ -219,6 +219,7 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
                             smoothScrolling: true,
                             cursorBlinking: "smooth",
                             cursorSmoothCaretAnimation: "on",
+                            automaticLayout: true,
                         }}
                     />
                 </div>
