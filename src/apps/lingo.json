@@ -3,12 +3,7 @@
         "en",
         "es",
         "fr",
-        "hi",
-        "de",
-        "zh",
-        "ja",
-        "ko",
-        "pt"
+        "hi"
     ],
     "defaultLocale": "en",
     "include": [
