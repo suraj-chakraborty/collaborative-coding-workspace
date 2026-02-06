@@ -18,72 +18,141 @@ export const useWebRTC = (workspaceId: string, user: any, token: string | null, 
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOff, setIsVideoOff] = useState(audioOnly);
 
+    // useEffect(() => {
+    //     if (!token) return;
+
+    //     let stream: MediaStream | null = null;
+
+    //     socketRef.current = io(process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001", {
+    //         auth: { token }
+    //     });
+
+    //     navigator.mediaDevices
+    //         .getUserMedia({ video: !audioOnly, audio: true })
+    //         .then((s) => {
+    //             stream = s;
+    //             setLocalStream(s);
+
+    //             socketRef.current?.emit("join-voice-room", workspaceId, audioOnly ? "audio" : "video");
+
+    //             socketRef.current?.on("all-users", (users: { id: string, name: string, image?: string }[]) => {
+    //                 const peers: PeerUser[] = [];
+    //                 users.forEach((u) => {
+    //                     const peer = createPeer(u.id, socketRef.current!.id, s);
+    //                     const newUser = { peerID: u.id, peer, name: u.name, image: u.image };
+    //                     peersRef.current.push(newUser);
+    //                     peers.push(newUser);
+    //                 });
+    //                 setPeers(peers);
+    //             });
+
+    //             socketRef.current?.on("user-joined", (payload: { signal: any; callerID: string; name: string; image?: string }) => {
+    //                 const peer = addPeer(payload.signal, payload.callerID, s);
+    //                 const newUser = { peerID: payload.callerID, peer, name: payload.name, image: payload.image };
+    //                 peersRef.current.push(newUser);
+    //                 setPeers((users) => [...users, newUser]);
+    //             });
+
+    //             socketRef.current?.on("receiving-returned-signal", (payload: { signal: any; id: string }) => {
+    //                 const item = peersRef.current.find((p) => p.peerID === payload.id);
+    //                 item?.peer.signal(payload.signal);
+    //             });
+
+    //             socketRef.current?.on("user-left", (peerID: string) => {
+    //                 const peerObj = peersRef.current.find(p => p.peerID === peerID);
+    //                 if (peerObj) peerObj.peer.destroy();
+    //                 const filteredPeers = peersRef.current.filter(p => p.peerID !== peerID);
+    //                 peersRef.current = filteredPeers;
+    //                 setPeers(filteredPeers);
+    //             });
+
+    //             socketRef.current?.on("call-ended", ({ reason }: { reason: string }) => {
+    //                 toast.info(`Call ended: ${reason === "initiator-left" ? "Initiator left" : "Finished"}`);
+    //                 leaveCall();
+    //             });
+    //         })
+    //         .catch((err) => {
+    //             console.error("Failed to get local stream", err);
+    //             toast.error("Microphone/Camera access denied or failed.");
+    //         });
+
+    //     return () => {
+    //         stream?.getTracks().forEach(track => track.stop());
+    //         socketRef.current?.emit("leave-voice-room", workspaceId);
+    //         socketRef.current?.disconnect();
+    //         peersRef.current.forEach(p => p.peer.destroy());
+    //         peersRef.current = [];
+    //     };
+    // }, [workspaceId, token, audioOnly, user]);
     useEffect(() => {
         if (!token) return;
 
         let stream: MediaStream | null = null;
 
-        socketRef.current = io(process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001", {
+        const socket = io(process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001", {
             auth: { token }
         });
 
-        navigator.mediaDevices
-            .getUserMedia({ video: !audioOnly, audio: true })
-            .then((s) => {
-                stream = s;
-                setLocalStream(s);
+        socketRef.current = socket;
 
-                socketRef.current?.emit("join-voice-room", workspaceId, audioOnly ? "audio" : "video");
+        socket.on("connect", () => {
+            navigator.mediaDevices
+                .getUserMedia({ video: !audioOnly, audio: true })
+                .then((s) => {
+                    stream = s;
+                    setLocalStream(s);
 
-                socketRef.current?.on("all-users", (users: { id: string, name: string, image?: string }[]) => {
-                    const peers: PeerUser[] = [];
-                    users.forEach((u) => {
-                        const peer = createPeer(u.id, socketRef.current!.id, s);
-                        const newUser = { peerID: u.id, peer, name: u.name, image: u.image };
-                        peersRef.current.push(newUser);
-                        peers.push(newUser);
+                    socket.emit("join-voice-room", workspaceId, audioOnly ? "audio" : "video");
+
+                    socket.on("all-users", (users: { id: string; name: string; image?: string }[]) => {
+                        if (!socket.id) return; // TS + runtime safety
+
+                        const peers: PeerUser[] = [];
+                        users.forEach((u) => {
+                            const peer = createPeer(u.id, socket.id!, s);
+                            const newUser = { peerID: u.id, peer, name: u.name, image: u.image };
+                            peersRef.current.push(newUser);
+                            peers.push(newUser);
+                        });
+                        setPeers(peers);
                     });
-                    setPeers(peers);
-                });
 
-                socketRef.current?.on("user-joined", (payload: { signal: any; callerID: string; name: string; image?: string }) => {
-                    const peer = addPeer(payload.signal, payload.callerID, s);
-                    const newUser = { peerID: payload.callerID, peer, name: payload.name, image: payload.image };
-                    peersRef.current.push(newUser);
-                    setPeers((users) => [...users, newUser]);
-                });
+                    socket.on("user-joined", (payload) => {
+                        const peer = addPeer(payload.signal, payload.callerID, s);
+                        const newUser = { peerID: payload.callerID, peer, name: payload.name, image: payload.image };
+                        peersRef.current.push(newUser);
+                        setPeers((users) => [...users, newUser]);
+                    });
 
-                socketRef.current?.on("receiving-returned-signal", (payload: { signal: any; id: string }) => {
-                    const item = peersRef.current.find((p) => p.peerID === payload.id);
-                    item?.peer.signal(payload.signal);
-                });
+                    socket.on("receiving-returned-signal", (payload) => {
+                        const item = peersRef.current.find((p) => p.peerID === payload.id);
+                        item?.peer.signal(payload.signal);
+                    });
 
-                socketRef.current?.on("user-left", (peerID: string) => {
-                    const peerObj = peersRef.current.find(p => p.peerID === peerID);
-                    if (peerObj) peerObj.peer.destroy();
-                    const filteredPeers = peersRef.current.filter(p => p.peerID !== peerID);
-                    peersRef.current = filteredPeers;
-                    setPeers(filteredPeers);
-                });
+                    socket.on("user-left", (peerID: string) => {
+                        const peerObj = peersRef.current.find(p => p.peerID === peerID);
+                        if (peerObj) peerObj.peer.destroy();
+                        peersRef.current = peersRef.current.filter(p => p.peerID !== peerID);
+                        setPeers(peersRef.current);
+                    });
 
-                socketRef.current?.on("call-ended", ({ reason }: { reason: string }) => {
-                    toast.info(`Call ended: ${reason === "initiator-left" ? "Initiator left" : "Finished"}`);
-                    leaveCall();
-                });
-            })
-            .catch((err) => {
-                console.error("Failed to get local stream", err);
-                toast.error("Microphone/Camera access denied or failed.");
-            });
+                    socket.on("call-ended", ({ reason }: { reason: string }) => {
+                        toast.info(`Call ended: ${reason === "initiator-left" ? "Initiator left" : "Finished"}`);
+                        leaveCall();
+                    });
+                })
+                .catch(() => toast.error("Microphone/Camera access denied"));
+        });
 
         return () => {
             stream?.getTracks().forEach(track => track.stop());
-            socketRef.current?.emit("leave-voice-room", workspaceId);
-            socketRef.current?.disconnect();
+            socket.emit("leave-voice-room", workspaceId);
+            socket.disconnect();
             peersRef.current.forEach(p => p.peer.destroy());
             peersRef.current = [];
         };
-    }, [workspaceId, token, audioOnly, user]);
+    }, [workspaceId, token, audioOnly]);
+
 
     function createPeer(userToSignal: string, callerID: string, stream: MediaStream) {
         const peer = new Peer({

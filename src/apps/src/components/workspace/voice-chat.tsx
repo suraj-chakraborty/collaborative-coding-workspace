@@ -209,9 +209,6 @@ export const VoiceChatPanel = ({ workspaceId, user, mode = "video" }: { workspac
                             <Video className="h-4 w-4 text-indigo-400" />
                             Viewing {expandedPeerId === "me" ? "Self" : peers.find(p => p.peerID === expandedPeerId)?.name}
                         </DialogTitle>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-zinc-400" onClick={() => setExpandedPeerId(null)}>
-                            <X className="h-4 w-4" />
-                        </Button>
                     </DialogHeader>
                     <div className="flex-1 bg-black relative flex items-center justify-center p-4">
                         {expandedPeerId === "me" ? (
