@@ -8,11 +8,7 @@
         "zh",
         "ja",
         "ko",
-        "pt",
-        "ru",
-        "ar",
-        "it",
-        "bn"
+        "pt"
     ],
     "defaultLocale": "en",
     "include": [
