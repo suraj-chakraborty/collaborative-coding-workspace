@@ -30,6 +30,9 @@ importers:
       '@prisma/client':
         specifier: ^7.3.0
         version: 7.3.0(prisma@7.3.0(@types/react@19.2.10)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)
+      '@types/simple-peer':
+        specifier: ^9.11.9
+        version: 9.11.9
       concurrently:
         specifier: ^9.1.2
         version: 9.2.1
@@ -3658,6 +3661,9 @@ packages:
 
   '@types/serve-static@2.2.0':
     resolution: {integrity: sha512-8mam4H1NHLtu7nmtalF7eyBH14QyOASmcxHhSfEoRyr0nP/YdoesEtU+uSRvMe96TW/HPTtkoKqQLl53N7UXMQ==}
+
+  '@types/simple-peer@9.11.9':
+    resolution: {integrity: sha512-6Gdl7TSS5oh9nuwKD4Pl8cSmaxWycYeZz9HLnJBNvIwWjZuGVsmHe9RwW3+9RxfhC1aIR9Z83DvaJoMw6rhkbg==}
 
   '@types/ssh2@1.15.5':
     resolution: {integrity: sha512-N1ASjp/nXH3ovBHddRJpli4ozpk6UdDYIX4RJWFa9L1YKnzdhTlVmiGHm4DZnj/jLbqZpes4aeR30EFGQtvhQQ==}
@@ -9417,7 +9423,7 @@ snapshots:
     dependencies:
       iso-639-3: 3.0.1
 
-  '@lingo.dev/_react@0.7.6(next@16.1.6(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
+  '@lingo.dev/_react@0.7.6(next@16.1.6(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))':
     dependencies:
       js-cookie: 3.0.5
       lodash: 4.17.21
@@ -11870,6 +11876,10 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/node': 22.19.7
 
+  '@types/simple-peer@9.11.9':
+    dependencies:
+      '@types/node': 22.19.7
+
   '@types/ssh2@1.15.5':
     dependencies:
       '@types/node': 18.19.130
@@ -12119,14 +12129,6 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.4(zod@4.1.12)
       '@opentelemetry/api': 1.9.0
       zod: 4.1.12
-
-  ai@6.0.25(zod@4.3.6):
-    dependencies:
-      '@ai-sdk/gateway': 3.0.10(zod@4.1.12)
-      '@ai-sdk/provider': 3.0.2
-      '@ai-sdk/provider-utils': 4.0.4(zod@4.1.12)
-      '@opentelemetry/api': 1.9.0
-      zod: 4.3.6
 
   ai@6.0.3(zod@4.3.6):
     dependencies:
@@ -14486,7 +14488,7 @@ snapshots:
       '@inquirer/prompts': 7.8.0(@types/node@22.19.7)
       '@lingo.dev/_compiler': 0.10.1
       '@lingo.dev/_locales': 0.3.3
-      '@lingo.dev/_react': 0.7.6(next@16.1.6(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+      '@lingo.dev/_react': 0.7.6(next@16.1.6(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       '@lingo.dev/_sdk': 0.13.7
       '@lingo.dev/_spec': 0.46.0
       '@markdoc/markdoc': 0.5.4(@types/react@19.2.10)(react@19.2.3)
@@ -14602,7 +14604,7 @@ snapshots:
       '@inquirer/prompts': 7.8.0(@types/node@22.19.7)
       '@lingo.dev/_compiler': 0.11.1
       '@lingo.dev/_locales': 0.3.3
-      '@lingo.dev/_react': 0.7.6(next@16.1.6(@babel/core@7.26.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
+      '@lingo.dev/_react': 0.7.6(next@16.1.6(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))
       '@lingo.dev/_sdk': 0.14.1
       '@lingo.dev/_spec': 0.47.1
       '@markdoc/markdoc': 0.5.4(@types/react@19.2.10)(react@19.2.3)
@@ -14610,7 +14612,7 @@ snapshots:
       '@openrouter/ai-sdk-provider': 6.0.0-alpha.1(zod@4.1.12)
       '@paralleldrive/cuid2': 2.2.2
       '@types/ejs': 3.1.5
-      ai: 6.0.25(zod@4.3.6)
+      ai: 6.0.25(zod@4.1.12)
       bitbucket: 2.12.0(encoding@0.1.13)
       chalk: 5.6.2
       chokidar: 4.0.3
@@ -15477,7 +15479,7 @@ snapshots:
     dependencies:
       '@ai-sdk/provider': 3.0.6
       '@ai-sdk/provider-utils': 4.0.11(zod@4.1.12)
-      ai: 6.0.25(zod@4.3.6)
+      ai: 6.0.25(zod@4.1.12)
       zod: 4.1.12
 
   ollama@0.6.3:
