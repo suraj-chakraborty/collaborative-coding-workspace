@@ -107,7 +107,7 @@ export class DockerService {
                 name: containerName,
                 HostConfig: {
                     Binds: [
-                        `${mountSource}:/home/coder/workspace`,
+                        `${mountSource}:/config/workspace`,
                         `${SHARED_VOLUMES.PNPM_STORE}:/home/coder/.local/share/pnpm/store`,
                         `${SHARED_VOLUMES.PIP_CACHE}:/home/coder/.cache/pip`,
                         `${SHARED_VOLUMES.CARGO_CACHE}:/home/coder/.cargo`,
@@ -124,12 +124,13 @@ export class DockerService {
                 },
                 Env: [
                     "PASSWORD=", // Empty to disable strict auth logic if any
+                    "DEFAULT_WORKSPACE=/config/workspace"
                 ],
                 Cmd: [
                     "/app/code-server/bin/code-server",
                     "--auth", "none",
                     "--bind-addr", `0.0.0.0:${CONFIG.CONTAINER_PORT}`,
-                    "/home/coder/workspace"
+                    "/config/workspace"
                 ],
                 ExposedPorts: {
                     [`${CONFIG.CONTAINER_PORT}/tcp`]: {},
