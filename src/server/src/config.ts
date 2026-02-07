@@ -9,6 +9,7 @@ export const CONFIG = {
     CPU_QUOTA: 50000, // 50% of one core
     STACK_IMAGES: {
         node: "linuxserver/code-server:latest",
+        nextjs: "linuxserver/code-server:latest",
         rust: "linuxserver/code-server:latest",
         python: "linuxserver/code-server:latest",
         go: "linuxserver/code-server:latest",

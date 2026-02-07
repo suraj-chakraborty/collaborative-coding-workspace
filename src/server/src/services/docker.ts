@@ -225,7 +225,7 @@ export class DockerService {
             return await AgentManager.sendCommand(workspace.ownerId, {
                 type: "START_CONTAINER",
                 workspaceId,
-                options: { image, containerName, mountSource, stack }
+                options: { image, containerName, mountSource, stack, repoUrl: workspace.repoUrl }
             });
         } else {
             // If on cloud but no agent, stop here

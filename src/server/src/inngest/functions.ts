@@ -43,6 +43,8 @@ export const setupWorkspace = inngest.createFunction(
 
                 execSync(`git clone --depth 1 --no-checkout ${cloneUrl} .`, { cwd: tempDir, stdio: 'ignore' });
                 const files = execSync(`git ls-tree -r --name-only HEAD`, { cwd: tempDir }).toString().split("\n");
+                console.log(`[Inngest] Repository file list (truncated):`, files.slice(0, 10));
+
                 const stack = detectStack(files);
                 console.log(`[Inngest] Detected stack for ${workspaceId}: ${stack}`);
 
