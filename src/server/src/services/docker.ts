@@ -24,16 +24,14 @@ const SHARED_VOLUMES = {
 
 export class DockerService {
     static async createContainer(workspaceId: string) {
-        // Re-fetch to get latest data (like stack) which might have been updated by Inngest
         const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
         if (!workspace) throw new Error("Workspace not found");
 
         const containerName = `ccw-${workspaceId}`;
-        let mountSource: string;
 
-        // Perform basic setup that doesn't touch Docker or FS yet
-        let stack = (workspace as any).stack;
-        const image = CONFIG.STACK_IMAGES[stack || "unknown"] || CONFIG.STACK_IMAGES.unknown;
+        // Always use the universal code-server image - agent will set up the environment
+        const image = CONFIG.STACK_IMAGES.unknown;
+        let mountSource: string;
 
         // Determine mountSource logic
         if (workspace.hostingType === "LOCAL") {
@@ -47,7 +45,13 @@ export class DockerService {
             return await AgentManager.sendCommand(workspace.ownerId, {
                 type: "START_CONTAINER",
                 workspaceId,
-                options: { image, containerName, mountSource, stack }
+                options: {
+                    image,
+                    containerName,
+                    mountSource,
+                    repoUrl: workspace.repoUrl,
+                    repoToken: workspace.repoToken
+                }
             });
         }
 
@@ -69,38 +73,7 @@ export class DockerService {
             await docker.createVolume({ Name: mountSource }).catch(() => null);
         }
 
-        // Perform on-the-fly stack detection if missing to ensure correct image selection
-        if (!stack && workspace.repoUrl) {
-            console.log(`[DockerService] Stack unknown for ${workspaceId}, detecting before creation...`);
-            const tempDir = path.join(os.tmpdir(), `cc-detect-${workspaceId}`);
-            try {
-                if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
-                fs.mkdirSync(tempDir, { recursive: true });
-
-                let cloneUrl = workspace.repoUrl;
-                if ((workspace as any).repoToken) {
-                    cloneUrl = workspace.repoUrl.replace("https://", `https://${(workspace as any).repoToken}@`);
-                }
-
-                execSync(`git clone --depth 1 --no-checkout ${cloneUrl} .`, { cwd: tempDir, stdio: 'ignore' });
-                const files = execSync(`git ls-tree -r --name-only HEAD`, { cwd: tempDir }).toString().split("\n");
-                stack = detectStack(files);
-
-                console.log(`[DockerService] Detected stack: ${stack}`);
-                await prisma.workspace.update({
-                    where: { id: workspaceId },
-                    data: { stack } as any
-                });
-            } catch (err) {
-                console.error("[DockerService] Stack detection failed:", err);
-                stack = "unknown";
-            } finally {
-                if (fs.existsSync(tempDir)) fs.rmSync(tempDir, { recursive: true, force: true });
-            }
-        }
-
-        // Use already calculated image and stack
-        console.log(`[DockerService] Selected image for workspace ${workspaceId} (stack: ${stack}): ${image}`);
+        console.log(`[DockerService] Creating container ${containerName} with image: ${image}`);
 
         try {
             // Agent check already handled at the top of the method
@@ -217,15 +190,20 @@ export class DockerService {
         const containerName = `ccw-${workspaceId}`;
 
         if (AgentManager.isAgentConnected(workspace.ownerId)) {
-            // Recalculate options for the agent if needed
-            const stack = (workspace as any).stack || "unknown";
-            const image = CONFIG.STACK_IMAGES[stack] || CONFIG.STACK_IMAGES.unknown;
+            // Use universal image - agent will set up environment after detecting stack
+            const image = CONFIG.STACK_IMAGES.unknown;
             const mountSource = workspace.hostingType === "LOCAL" ? path.join(CONFIG.WORKSPACE_ROOT, workspaceId) : `ccw-vol-${workspaceId}`;
 
             return await AgentManager.sendCommand(workspace.ownerId, {
                 type: "START_CONTAINER",
                 workspaceId,
-                options: { image, containerName, mountSource, stack, repoUrl: workspace.repoUrl }
+                options: {
+                    image,
+                    containerName,
+                    mountSource,
+                    repoUrl: workspace.repoUrl,
+                    repoToken: workspace.repoToken
+                }
             });
         } else {
             // If on cloud but no agent, stop here
