@@ -10,5 +10,9 @@ const nextConfig: NextConfig = {
 
 export default withLingo(nextConfig, {
   sourceLocale: "en",
-  targetLocales: ["es", "fr", "hi", "de", "zh", "ja", "ko", "pt", "ru", "ar", "it", "bn"]
+  targetLocales: [
+    "es",
+    "fr",
+    "hi"
+  ]
 });

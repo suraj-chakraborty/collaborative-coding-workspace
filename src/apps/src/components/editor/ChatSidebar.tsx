@@ -36,7 +36,7 @@ import {
 const translate = async (text: string, sourceLang: string, targetLang: string) => {
     if (sourceLang === targetLang) return text;
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/translate`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL + 'api/translate' || "http://localhost:3001"}/api/translate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text, from: sourceLang, to: targetLang }),
@@ -262,7 +262,7 @@ export function ChatSidebar({ workspaceId, socket, isOpen, ownerId, onUnreadCoun
 
     const uploadAndSend = async (name: string, type: "audio" | "image" | "file", content: string) => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/upload`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL + 'api/upload' || "http://localhost:3001"}/api/upload`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ name, type, content }),

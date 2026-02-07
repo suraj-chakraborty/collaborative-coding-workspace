@@ -89,13 +89,14 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         }
     }, [user, getToken]);
 
+
     const startContainer = async () => {
+        const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001/";
         setContainerStatus("STARTING");
         setErrorDetails(null);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/containers/${id}/start`, {
-                method: "POST",
-            });
+            const response = await fetch(`${baseUrl}api/containers/${id}/start`,
+                { method: "POST" });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.error || "Failed to start container");
@@ -115,7 +116,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
         setIsRestarting(true);
         setContainerStatus("STARTING");
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/containers/${id}/restart`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL + `api/containers/${id}/restart` || "http://localhost:3001"}/api/containers/${id}/restart`, {
                 method: "POST",
             });
             if (!response.ok) {
@@ -234,7 +235,10 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
 
     useEffect(() => {
         if (containerStatus === "STARTING") {
-            const eventSource = new EventSource(`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/api/workspaces/${id}/setup-status`);
+            const baseUrl =
+                process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001/";
+
+            const eventSource = new EventSource(`${baseUrl}api/workspaces/${id}/setup-status`);
 
             eventSource.onmessage = (event) => {
                 const data = JSON.parse(event.data);

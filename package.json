@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS=--max-old-space-size=8192 && concurrently \"pnpm --filter @collab-cloud/apps dev\" \"pnpm --filter @collab-cloud/server dev\"",
+    "dev": "set NODE_OPTIONS=--max-old-space-size=8192 && concurrently \"pnpm --filter @collab-cloud/apps dev\" ",
     "build": "pnpm --filter @collab-cloud/apps build && pnpm --filter @collab-cloud/server build",
     "start": "concurrently \"pnpm --filter @collab-cloud/apps start\" \"pnpm --filter @collab-cloud/server start\"",
     "lint": "pnpm --filter @collab-cloud/apps lint && pnpm --filter @collab-cloud/server lint",
