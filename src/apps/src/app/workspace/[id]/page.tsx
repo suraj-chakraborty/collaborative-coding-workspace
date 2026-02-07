@@ -57,6 +57,7 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
     const { getToken } = useAuth();
     const [token, setToken] = useState<string | null>(null);
     const [containerStatus, setContainerStatus] = useState<"IDLE" | "STARTING" | "RUNNING" | "ERROR">("IDLE");
+    const [containerPort, setContainerPort] = useState<string | null>(null);
     const [loadingStage, setLoadingStage] = useState<string>("");
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [isRestarting, setIsRestarting] = useState(false);
@@ -100,6 +101,11 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.error || "Failed to start container");
+            }
+
+            const result = await response.json();
+            if (result.port) {
+                setContainerPort(result.port);
             }
 
             setContainerStatus("RUNNING");
@@ -181,6 +187,13 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 title: "Windows Setup Error",
                 message: "Docker Desktop is having trouble mounting your Windows drive. This often happens if the drive sharing is not properly configured in Docker settings.",
                 action: "Enable 'Use the WSL 2 based engine' and 'File Sharing' in Docker Desktop settings"
+            };
+        }
+        if (err.includes("local agent not connected")) {
+            return {
+                title: "Local Agent Required",
+                message: "This workspace requires a local agent to be running on your machine to manage Docker containers.",
+                action: "Please start your local agent and refresh the page."
             };
         }
         return {
@@ -420,7 +433,10 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                 {containerStatus === "RUNNING" ? (
                     viewMode === "cloud" ? (
                         <iframe
-                            src={`${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/home/coder/workspace`}
+                            src={containerPort
+                                ? `http://localhost:${containerPort}/?folder=/home/coder/workspace`
+                                : `${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/home/coder/workspace`
+                            }
                             className="w-full h-full border-0"
                             allow="clipboard-read; clipboard-write"
                         />

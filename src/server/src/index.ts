@@ -11,6 +11,7 @@ import { proxyRequestHandler, proxy, getContainerPort } from "./services/proxy";
 import { progressService } from "./services/progress";
 import { clerkClient } from "@clerk/clerk-sdk-node";
 import { prisma } from "./lib/prisma";
+import { AgentManager } from "./services/agent-manager";
 
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@as-integrations/express4";
@@ -115,6 +116,13 @@ const startServer = async () => {
         }
     });
 
+    app.get("/api/debug/agents", (req, res) => {
+        res.json({
+            connectedAgents: AgentManager.getConnectedUserIds(),
+            serverTime: new Date().toISOString()
+        });
+    });
+
     app.get("/api/workspaces/:id/setup-status", (req, res) => {
         const workspaceId = req.params.id;
         res.setHeader("Content-Type", "text/event-stream");
@@ -210,6 +218,45 @@ const startServer = async () => {
             console.error("Socket Auth Error:", err);
             next(new Error("Authentication error"));
         }
+    });
+
+    // Socket.IO for Agents
+    const agentIo = io.of("/agent");
+    agentIo.use(async (socket, next) => {
+        try {
+            const token = socket.handshake.auth.token;
+            const providedUserId = socket.handshake.auth.userId;
+
+            if (!token) return next(new Error("Authentication error: No token provided"));
+
+            // Option 1: Clerk JWT (Recommended for security)
+            const decoded = await clerkClient.verifyToken(token).catch(() => null);
+            if (decoded) {
+                (socket as any).userId = decoded.sub;
+                console.log(`[AgentAuth] Authenticated via Clerk JWT for user: ${(socket as any).userId}`);
+                return next();
+            }
+
+            // Option 2: Pre-shared AGENT_KEY (Easier for local development)
+            const agentKey = process.env.AGENT_KEY || "dev-agent-key";
+            if (token === agentKey && providedUserId) {
+                (socket as any).userId = providedUserId;
+                console.log(`[AgentAuth] Authenticated via AGENT_KEY for user: ${providedUserId}`);
+                return next();
+            }
+
+            console.warn(`[AgentAuth] Auth failed for token: ${token.slice(0, 10)}... (userId provided: ${providedUserId})`);
+            next(new Error("Authentication error: Invalid token or missing userId"));
+        } catch (err) {
+            console.error("Agent Socket Auth Error:", err);
+            next(new Error("Authentication error"));
+        }
+    });
+
+    agentIo.on("connection", (socket) => {
+        const userId = (socket as any).userId;
+        console.log(`Presence: Local Agent connected for user: ${userId} (${socket.id})`);
+        AgentManager.registerAgent(userId, socket as any);
     });
 
     // Socket.IO for Chat & Platform Events

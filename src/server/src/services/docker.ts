@@ -8,6 +8,7 @@ import { prisma } from "../lib/prisma";
 import { detectStack } from "../lib/stack-detector";
 
 import { progressService } from "./progress";
+import { AgentManager } from "./agent-manager";
 
 const docker = new Dockerode();
 const WORKSPACE_ROOT = CONFIG.WORKSPACE_ROOT;
@@ -30,13 +31,32 @@ export class DockerService {
         const containerName = `ccw-${workspaceId}`;
         let mountSource: string;
 
-        if (workspace.hostingType === "LOCAL") {
-            const rawPath = path.join(CONFIG.WORKSPACE_ROOT, workspaceId);
+        // Perform basic setup that doesn't touch Docker or FS yet
+        let stack = (workspace as any).stack;
+        const image = CONFIG.STACK_IMAGES[stack || "unknown"] || CONFIG.STACK_IMAGES.unknown;
 
+        // Determine mountSource logic
+        if (workspace.hostingType === "LOCAL") {
+            mountSource = path.join(CONFIG.WORKSPACE_ROOT, workspaceId);
+        } else {
+            mountSource = `ccw-vol-${workspaceId}`;
+        }
+
+        // CRITICAL: Check for agent BEFORE any local docker or fs calls
+        if (AgentManager.isAgentConnected(workspace.ownerId)) {
+            return await AgentManager.sendCommand(workspace.ownerId, {
+                type: "START_CONTAINER",
+                workspaceId,
+                options: { image, containerName, mountSource, stack }
+            });
+        }
+
+        // Now proceed with local logic if NO agent
+        if (workspace.hostingType === "LOCAL") {
+            const rawPath = mountSource;
             if (!fs.existsSync(rawPath)) {
                 fs.mkdirSync(rawPath, { recursive: true });
             }
-
             // Normalize path for Windows Docker Desktop: J:\foo -> /j/foo
             mountSource =
                 process.platform === "win32"
@@ -44,17 +64,12 @@ export class DockerService {
                         .replace(/\\/g, "/")
                         .replace(/^([A-Za-z]):/, (_, d) => `/run/desktop/mnt/host/${d.toLowerCase()}`)
                     : rawPath;
-            console.log(`[DockerService] Workspace ${workspaceId} -> Using Local Bind Mount: ${mountSource}`);
         } else {
-            const volumeName = `ccw-vol-${workspaceId}`;
-            // Ensure volume exists
-            await docker.createVolume({ Name: volumeName }).catch(() => null);
-            mountSource = volumeName;
-            console.log(`[DockerService] Workspace ${workspaceId} -> Using Cloud Volume: ${mountSource}`);
+            // Ensure volume exists - ONLY if not delegating
+            await docker.createVolume({ Name: mountSource }).catch(() => null);
         }
 
         // Perform on-the-fly stack detection if missing to ensure correct image selection
-        let stack = (workspace as any).stack;
         if (!stack && workspace.repoUrl) {
             console.log(`[DockerService] Stack unknown for ${workspaceId}, detecting before creation...`);
             const tempDir = path.join(os.tmpdir(), `cc-detect-${workspaceId}`);
@@ -84,10 +99,12 @@ export class DockerService {
             }
         }
 
-        const image = CONFIG.STACK_IMAGES[stack || "unknown"] || CONFIG.STACK_IMAGES.unknown;
+        // Use already calculated image and stack
         console.log(`[DockerService] Selected image for workspace ${workspaceId} (stack: ${stack}): ${image}`);
 
         try {
+            // Agent check already handled at the top of the method
+
             const existingContainer = docker.getContainer(containerName);
             const data = await existingContainer.inspect().catch(() => null);
 
@@ -198,8 +215,27 @@ export class DockerService {
         if (!workspace) throw new Error("Workspace not found");
 
         const containerName = `ccw-${workspaceId}`;
-        let container = docker.getContainer(containerName);
 
+        if (AgentManager.isAgentConnected(workspace.ownerId)) {
+            // Recalculate options for the agent if needed
+            const stack = (workspace as any).stack || "unknown";
+            const image = CONFIG.STACK_IMAGES[stack] || CONFIG.STACK_IMAGES.unknown;
+            const mountSource = workspace.hostingType === "LOCAL" ? path.join(CONFIG.WORKSPACE_ROOT, workspaceId) : `ccw-vol-${workspaceId}`;
+
+            return await AgentManager.sendCommand(workspace.ownerId, {
+                type: "START_CONTAINER",
+                workspaceId,
+                options: { image, containerName, mountSource, stack }
+            });
+        } else {
+            // If on cloud but no agent, stop here
+            if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+                console.error(`[DockerService] ❌ Local agent required but not connected for user ${workspace.ownerId}`);
+                throw new Error("Local agent not connected. Please ensure your local agent application is running and connected (check https://collaborative-coding-workspace-1.onrender.com/api/debug/agents)");
+            }
+        }
+
+        let container = docker.getContainer(containerName);
         const data = await container.inspect().catch(() => null);
 
         // Migration: If container exists but mount type doesn't match HostingType, remove and recreate
@@ -395,6 +431,20 @@ export class DockerService {
     }
 
     static async stopContainer(workspaceId: string) {
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        if (!workspace) throw new Error("Workspace not found");
+
+        if (workspace && AgentManager.isAgentConnected(workspace.ownerId)) {
+            return await AgentManager.sendCommand(workspace.ownerId, {
+                type: "STOP_CONTAINER",
+                workspaceId
+            });
+        }
+
+        if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+            throw new Error("Local agent not connected.");
+        }
+
         const container = docker.getContainer(`ccw-${workspaceId}`);
         const data = await container.inspect().catch(() => null);
         if (data && data.State.Running) {
@@ -403,6 +453,18 @@ export class DockerService {
     }
 
     static async stopAndRemoveContainer(workspaceId: string) {
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        if (workspace && AgentManager.isAgentConnected(workspace.ownerId)) {
+            return await AgentManager.sendCommand(workspace.ownerId, {
+                type: "CLEANUP", // Using CLEANUP for stop and remove
+                workspaceId
+            });
+        }
+
+        if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+            throw new Error("Local agent not connected.");
+        }
+
         const containerName = `ccw-${workspaceId}`;
         const container = docker.getContainer(containerName);
         const data = await container.inspect().catch(() => null);
@@ -427,6 +489,19 @@ export class DockerService {
     }
 
     static async getContainerStatus(workspaceId: string) {
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        if (workspace && AgentManager.isAgentConnected(workspace.ownerId)) {
+            const resp = await AgentManager.sendCommand(workspace.ownerId, {
+                type: "GET_STATUS",
+                workspaceId
+            });
+            return resp.status;
+        }
+
+        if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+            return "OFFLINE"; // Fallback for cloud without agent
+        }
+
         const container = docker.getContainer(`ccw-${workspaceId}`);
         const data = await container.inspect().catch(() => null);
         if (!data) return "OFFLINE";
@@ -434,6 +509,17 @@ export class DockerService {
     }
 
     static async restartContainer(workspaceId: string) {
+        const workspace: any = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+        if (workspace && AgentManager.isAgentConnected(workspace.ownerId)) {
+            return await AgentManager.sendCommand(workspace.ownerId, {
+                type: "RESTART_CONTAINER",
+                workspaceId
+            });
+        }
+
+        if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+            throw new Error("Local agent not connected.");
+        }
         const containerName = `ccw-${workspaceId}`;
         const container = docker.getContainer(containerName);
 
@@ -538,6 +624,11 @@ export class DockerService {
     }
 
     static async cleanupStaleContainers() {
+        if (process.env.NODE_ENV === "production" || process.env.RENDER) {
+            // No local cleanup on cloud (handled by agent or Render)
+            return;
+        }
+
         try {
             const containers = await docker.listContainers({ all: true });
             const ccwContainers = containers.filter(c => c.Names.some(name => name.startsWith("/ccw-")));
