@@ -1,13 +1,18 @@
 import { Server, Socket } from "socket.io";
 
 export interface AgentCommand {
-    type: "START_CONTAINER" | "STOP_CONTAINER" | "RESTART_CONTAINER" | "GET_STATUS" | "CLEANUP" | "FS_TREE" | "FS_READ" | "FS_WRITE" | "FS_DELETE" | "FS_RENAME" | "FS_MKDIR";
+    type: "START_CONTAINER" | "STOP_CONTAINER" | "RESTART_CONTAINER" | "GET_STATUS" | "CLEANUP" | "FS_TREE" | "FS_READ" | "FS_WRITE" | "FS_DELETE" | "FS_RENAME" | "FS_MKDIR" | "TERMINAL_INIT" | "TERMINAL_INPUT";
     workspaceId?: string;
     options?: any;
 }
 
 export class AgentManager {
     private static agents: Map<string, Socket> = new Map(); // userId -> Socket
+    private static io: Server;
+
+    static setIo(io: Server) {
+        this.io = io;
+    }
 
     static registerAgent(userId: string, socket: Socket) {
         console.log(`[AgentManager] ✅ Registering agent for user: ${userId} (${socket.id})`);
@@ -17,6 +22,13 @@ export class AgentManager {
             console.log(`[AgentManager] ❌ Agent disconnected for user: ${userId}. Reason: ${reason}`);
             if (this.agents.get(userId) === socket) {
                 this.agents.delete(userId);
+            }
+        });
+
+        // Listen for terminal output from agent
+        socket.on("terminal-output", (data: { workspaceId: string, output: string }) => {
+            if (this.io) {
+                this.io.to(`workspace-${data.workspaceId}`).emit("terminal-output", data.output);
             }
         });
 

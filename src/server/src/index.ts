@@ -40,6 +40,8 @@ const startServer = async () => {
         pingInterval: 25000,
     });
 
+    AgentManager.setIo(io);
+
     const apolloServer = new ApolloServer({
         typeDefs,
         resolvers,
@@ -450,14 +452,43 @@ const startServer = async () => {
 
         // Shared Terminal Events
         socket.on("terminal-init", async (workspaceId: string) => {
-            const { TerminalService } = require("./services/terminal");
-            await TerminalService.getOrCreateSession(workspaceId, io);
-            console.log(`[Terminal] User ${socket.id} initialized terminal for ${workspaceId}`);
+            try {
+                const workspace = await prisma.workspace.findUnique({ where: { id: workspaceId } });
+                if (!workspace) return;
+
+                if (AgentManager.isAgentConnected(workspace.ownerId)) {
+                    await AgentManager.sendCommand(workspace.ownerId, {
+                        type: "TERMINAL_INIT",
+                        workspaceId
+                    });
+                } else {
+                    const { TerminalService } = require("./services/terminal");
+                    await TerminalService.getOrCreateSession(workspaceId, io);
+                }
+                console.log(`[Terminal] User ${socket.id} initialized terminal for ${workspaceId}`);
+            } catch (err) {
+                console.error("Terminal Init Error:", err);
+            }
         });
 
-        socket.on("terminal-input", (data: { workspaceId: string; input: string }) => {
-            const { TerminalService } = require("./services/terminal");
-            TerminalService.write(data.workspaceId, data.input);
+        socket.on("terminal-input", async (data: { workspaceId: string; input: string }) => {
+            try {
+                const workspace = await prisma.workspace.findUnique({ where: { id: data.workspaceId } });
+                if (!workspace) return;
+
+                if (AgentManager.isAgentConnected(workspace.ownerId)) {
+                    await AgentManager.sendCommand(workspace.ownerId, {
+                        type: "TERMINAL_INPUT",
+                        workspaceId: data.workspaceId,
+                        options: { input: data.input }
+                    });
+                } else {
+                    const { TerminalService } = require("./services/terminal");
+                    TerminalService.write(data.workspaceId, data.input);
+                }
+            } catch (err) {
+                console.error("Terminal Input Error:", err);
+            }
         });
 
         // WebRTC Signaling Events
