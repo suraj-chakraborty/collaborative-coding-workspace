@@ -36,6 +36,8 @@ const startServer = async () => {
             origin: process.env.CLIENT_URL || "http://localhost:3000",
             methods: ["GET", "POST"],
         },
+        pingTimeout: 60000,
+        pingInterval: 25000,
     });
 
     const apolloServer = new ApolloServer({
@@ -116,10 +118,23 @@ const startServer = async () => {
         }
     });
 
-    app.get("/api/debug/agents", (req, res) => {
+    app.get("/api/debug/agents", async (req, res) => {
+        let visitorUserId = "Not authenticated";
+        const token = (req as any).headers.token || req.query.token;
+
+        if (token) {
+            const decoded = await clerkClient.verifyToken(token as string).catch(() => null);
+            if (decoded) {
+                visitorUserId = decoded.sub;
+            }
+        }
+
         res.json({
+            status: "Online",
+            yourUserId: visitorUserId,
             connectedAgents: AgentManager.getConnectedUserIds(),
-            serverTime: new Date().toISOString()
+            serverTime: new Date().toISOString(),
+            instructions: "Copy 'yourUserId' into src/agent/.env as USER_ID"
         });
     });
 

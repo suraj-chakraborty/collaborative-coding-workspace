@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 
 export interface AgentCommand {
-    type: "START_CONTAINER" | "STOP_CONTAINER" | "RESTART_CONTAINER" | "GET_STATUS" | "CLEANUP";
+    type: "START_CONTAINER" | "STOP_CONTAINER" | "RESTART_CONTAINER" | "GET_STATUS" | "CLEANUP" | "FS_TREE" | "FS_READ" | "FS_WRITE" | "FS_DELETE" | "FS_RENAME" | "FS_MKDIR";
     workspaceId?: string;
     options?: any;
 }
