@@ -91,6 +91,12 @@ const startServer = async () => {
     // Upload Route
     app.use("/api/upload", uploadRouter);
 
+    // Files Route
+    app.use("/api/files", filesRouter);
+
+    // Translate Route
+    app.use("/api/translate", translateRouter);
+
     // Container management routes
     app.post("/api/containers/:id/start", async (req, res) => {
         try {
