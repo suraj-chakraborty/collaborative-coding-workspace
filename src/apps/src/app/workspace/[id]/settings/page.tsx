@@ -118,7 +118,7 @@ export default function WorkspaceSettings({ params }: { params: Promise<{ id: st
     const activeInvite = workspace.invites?.find((inv: any) => !inv.isRevoked);
 
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen max-h-screen bg-background p-8 overflow-y-auto">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">

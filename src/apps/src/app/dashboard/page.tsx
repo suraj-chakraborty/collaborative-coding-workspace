@@ -86,8 +86,8 @@ export default function DashboardPage() {
                 </nav>
             </aside>
 
-            <main className="ml-64 w-full">
-                <header className="flex h-16 items-center justify-between border-b border-white/5 bg-background/50 px-8 backdrop-blur-md">
+            <main className="ml-64 w-full flex flex-col h-screen">
+                <header className="flex h-16 items-center justify-between border-b border-white/5 bg-background/50 px-8 backdrop-blur-md flex-shrink-0">
                     <div className="relative w-96">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input
@@ -107,7 +107,7 @@ export default function DashboardPage() {
                 </header>
 
                 {/* Dashboard Content */}
-                <div className="p-8">
+                <div className="p-8 overflow-y-auto flex-1">
                     <div className="mb-8 flex items-center justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-white">Your Workspaces</h1>

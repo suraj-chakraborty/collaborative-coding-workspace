@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ProfilePage() {
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen max-h-screen bg-background p-8 overflow-y-auto">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-8 flex items-center justify-between">
                     <Link href="/dashboard">
