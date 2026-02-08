@@ -118,7 +118,7 @@ export default function WorkspaceSettings({ params }: { params: Promise<{ id: st
     const activeInvite = workspace.invites?.find((inv: any) => !inv.isRevoked);
 
     return (
-        <div className="min-h-screen bg-background p-8">
+        <div className="min-h-screen max-h-screen overflow-y-auto bg-background p-8 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-indigo-500/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-indigo-500/70">
             <div className="mx-auto max-w-4xl">
                 <div className="mb-8 flex items-center justify-between">
                     <div className="flex items-center gap-4">

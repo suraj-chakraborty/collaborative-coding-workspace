@@ -67,7 +67,8 @@ export function FileExplorer({ workspaceId, onFileSelect, className }: FileExplo
 
     const fetchTree = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/tree`);
+            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+            const res = await fetch(`${baseUrl}/api/files/${workspaceId}/tree`);
             if (res.ok) {
                 const data = await res.json();
                 setFiles(data);
@@ -118,7 +119,8 @@ export function FileExplorer({ workspaceId, onFileSelect, className }: FileExplo
         const endpoint = creating.type === "file" ? "write" : "mkdir";
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/${endpoint}`, {
+            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+            const res = await fetch(`${baseUrl}/api/files/${workspaceId}/${endpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ path: relativePath, content: "" }),
@@ -155,7 +157,8 @@ export function FileExplorer({ workspaceId, onFileSelect, className }: FileExplo
         const newPath = parentPath === "" ? `/${newItemName}` : `${parentPath}/${newItemName}`;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/rename`, {
+            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+            const res = await fetch(`${baseUrl}/api/files/${workspaceId}/rename`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ oldPath: renaming.path, newPath }),
@@ -180,7 +183,8 @@ export function FileExplorer({ workspaceId, onFileSelect, className }: FileExplo
         if (!confirm("Are you sure you want to delete this? This action cannot be undone.")) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/delete`, {
+            const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+            const res = await fetch(`${baseUrl}/api/files/${workspaceId}/delete`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ path }),

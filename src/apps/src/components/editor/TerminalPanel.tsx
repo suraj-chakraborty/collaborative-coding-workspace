@@ -42,13 +42,14 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
         const resizeObserver = new ResizeObserver(() => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {
+                const core = (term as any)._core;
                 if (
                     terminalRef.current &&
                     terminalRef.current.offsetWidth > 0 &&
                     terminalRef.current.offsetHeight > 0 &&
                     term.element &&
-                    (term as any)._core?._renderService &&
-                    (term as any)._core?._charMeasure?.dimensions // Explicitly check dimensions
+                    core?._renderService &&
+                    core?._charMeasure?.dimensions // Explicitly check dimensions
                 ) {
                     try {
                         fitAddon.fit();
@@ -63,24 +64,29 @@ export function TerminalPanel({ workspaceId, socketUrl }: TerminalPanelProps) {
 
         // Initial fit with better retry logic
         const tryFit = (retries = 10) => {
-            if (
-                terminalRef.current &&
-                terminalRef.current.offsetWidth > 0 &&
-                term.element &&
-                (term as any)._core?._renderService &&
-                (term as any)._core?._charMeasure?.dimensions
-            ) {
-                try {
-                    fitAddon.fit();
-                } catch (e) {
-                    if (retries > 0) setTimeout(() => tryFit(retries - 1), 200);
+            requestAnimationFrame(() => {
+                const core = (term as any)._core;
+                if (
+                    terminalRef.current &&
+                    terminalRef.current.offsetWidth > 0 &&
+                    terminalRef.current.offsetHeight > 0 &&
+                    term.element &&
+                    core?._renderService &&
+                    core?._charMeasure?.dimensions
+                ) {
+                    try {
+                        fitAddon.fit();
+                    } catch (e) {
+                        if (retries > 0) setTimeout(() => tryFit(retries - 1), 200);
+                    }
+                } else if (retries > 0) {
+                    setTimeout(() => tryFit(retries - 1), 200);
                 }
-            } else if (retries > 0) {
-                setTimeout(() => tryFit(retries - 1), 200);
-            }
+            });
         };
 
-        tryFit();
+        // Delay initial fit to allow DOM to fully render
+        setTimeout(() => tryFit(), 100);
 
         getToken().then(token => {
             if (!token) return;

@@ -86,8 +86,8 @@ export default function DashboardPage() {
                 </nav>
             </aside>
 
-            <main className="ml-64 w-full">
-                <header className="flex h-16 items-center justify-between border-b border-white/5 bg-background/50 px-8 backdrop-blur-md">
+            <main className="ml-64 w-full h-screen overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-indigo-500/50 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-indigo-500/70">
+                <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-white/5 bg-background/50 px-8 backdrop-blur-md">
                     <div className="relative w-96">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <input

@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "set NODE_OPTIONS=--max-old-space-size=8192 && concurrently \"pnpm --filter @collab-cloud/apps dev\" \"pnpm --filter @collab-cloud/agent dev\"",
-    "build": "pnpm --filter @collab-cloud/apps build && pnpm --filter @collab-cloud/server build",
-    "start": "concurrently \"pnpm --filter @collab-cloud/apps start\" \"pnpm --filter @collab-cloud/server start\"",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=8192 concurrently \"pnpm --filter @collab-cloud/apps dev\" \"pnpm --filter @collab-cloud/agent dev\"",
+    "build": "pnpm --filter @collab-cloud/apps build && pnpm --filter @collab-cloud/server build && pnpm --filter @collab-cloud/agent build",
+    "start": "concurrently \"pnpm --filter @collab-cloud/apps start\" \"pnpm --filter @collab-cloud/agent start\"",
     "lint": "pnpm --filter @collab-cloud/apps lint && pnpm --filter @collab-cloud/server lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

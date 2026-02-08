@@ -434,8 +434,8 @@ export default function WorkspacePage({ params }: { params: Promise<{ id: string
                     viewMode === "cloud" ? (
                         <iframe
                             src={containerPort
-                                ? `http://localhost:${containerPort}/?folder=/home/coder/workspace`
-                                : `${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/home/coder/workspace`
+                                ? `http://localhost:${containerPort}/?folder=/config/workspace`
+                                : `${process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:3001"}/ws/${id}/?folder=/config/workspace`
                             }
                             className="w-full h-full border-0"
                             allow="clipboard-read; clipboard-write"

@@ -42,7 +42,8 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
 
         const loadContent = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/read`, {
+                const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+                const res = await fetch(`${baseUrl}/api/files/${workspaceId}/read`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ path: filePath }),
@@ -76,7 +77,7 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
 
         const doc = docRef.current;
         const roomName = `ccw-${workspaceId}`;
-        const wsEndpoint = `${socketUrl.replace("http", "ws")}/yjs`;
+        const wsEndpoint = `${socketUrl.replace("http", "ws")}yjs`;
 
         const provider = new WebsocketProvider(wsEndpoint, roomName, doc);
         providerRef.current = provider;
@@ -122,7 +123,8 @@ export default function CodeEditor({ workspaceId, socketUrl, filePath }: CodeEdi
             // Hydrate content
             if (yText.toString() === "") {
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/files/${workspaceId}/read`, {
+                    const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, "") || "";
+                    const res = await fetch(`${baseUrl}/api/files/${workspaceId}/read`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ path: filePath }),
