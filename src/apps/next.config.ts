@@ -6,9 +6,13 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: '../../',
   }
-} as any;
+}
 
 export default withLingo(nextConfig, {
   sourceLocale: "en",
-  targetLocales: ["es", "fr", "hi", "de", "zh", "ja", "ko", "pt", "ru", "ar", "it", "bn"]
+  targetLocales: ["en",
+        "es",
+        "fr",
+        "hi"
+      ]
 });

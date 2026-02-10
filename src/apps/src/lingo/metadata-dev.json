@@ -1,487 +1,1598 @@
 {
   "entries": {
-    "1fbc5864e830": {
+    "a4f895ec959b": {
       "type": "content",
       "sourceText": "CCW",
       "context": {
-        "componentName": "DashboardPage",
-        "filePath": "../app/dashboard/page.tsx"
+        "componentName": "DashboardLayout",
+        "filePath": "components/layout/dashboard-layout.tsx"
       },
-      "hash": "1fbc5864e830",
+      "hash": "a4f895ec959b",
       "location": {
-        "filePath": "../app/dashboard/page.tsx",
-        "line": 53,
+        "filePath": "components/layout/dashboard-layout.tsx",
+        "line": 31,
         "column": 20
       }
     },
-    "c59f7487b179": {
+    "675e4a8e80a9": {
       "type": "attribute",
-      "sourceText": "Search workspaces...",
+      "sourceText": "Search...",
       "context": {
         "attributeName": "placeholder",
-        "componentName": "DashboardPage",
-        "filePath": "../app/dashboard/page.tsx"
+        "componentName": "DashboardLayout",
+        "filePath": "components/layout/dashboard-layout.tsx"
       },
-      "hash": "c59f7487b179",
+      "hash": "675e4a8e80a9",
       "location": {
-        "filePath": "../app/dashboard/page.tsx",
-        "line": 78,
+        "filePath": "components/layout/dashboard-layout.tsx",
+        "line": 56,
         "column": 24
       }
     },
-    "f641b4e01f67": {
+    "729bafbabdce": {
       "type": "content",
       "sourceText": "Your Workspaces",
       "context": {
         "componentName": "DashboardPage",
-        "filePath": "../app/dashboard/page.tsx"
+        "filePath": "app/dashboard/page.tsx"
       },
-      "hash": "f641b4e01f67",
+      "hash": "729bafbabdce",
       "location": {
-        "filePath": "../app/dashboard/page.tsx",
-        "line": 96,
-        "column": 28
+        "filePath": "app/dashboard/page.tsx",
+        "line": 64,
+        "column": 20
       }
     },
-    "40a51a309a98": {
+    "f6b2e90045a2": {
       "type": "content",
       "sourceText": "Manage and launch your cloud development environments.",
       "context": {
         "componentName": "DashboardPage",
-        "filePath": "../app/dashboard/page.tsx"
+        "filePath": "app/dashboard/page.tsx"
       },
-      "hash": "40a51a309a98",
+      "hash": "f6b2e90045a2",
       "location": {
-        "filePath": "../app/dashboard/page.tsx",
-        "line": 97,
-        "column": 28
+        "filePath": "app/dashboard/page.tsx",
+        "line": 65,
+        "column": 20
       }
     },
-    "34183d7391c4": {
+    "6dd355f0568d": {
       "type": "content",
       "sourceText": "No workspaces found. Create your first one to get started.",
       "context": {
         "componentName": "DashboardPage",
-        "filePath": "../app/dashboard/page.tsx"
+        "filePath": "app/dashboard/page.tsx"
       },
-      "hash": "34183d7391c4",
+      "hash": "6dd355f0568d",
       "location": {
-        "filePath": "../app/dashboard/page.tsx",
-        "line": 142,
-        "column": 36
+        "filePath": "app/dashboard/page.tsx",
+        "line": 170,
+        "column": 28
       }
     },
-    "6e15a14724e5": {
+    "dcb117270459": {
       "type": "content",
-      "sourceText": "Close",
+      "sourceText": "Join with Code",
       "context": {
-        "componentName": "DialogContent",
-        "filePath": "../components/ui/dialog.tsx"
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
       },
-      "hash": "6e15a14724e5",
+      "hash": "dcb117270459",
       "location": {
-        "filePath": "../components/ui/dialog.tsx",
-        "line": 76,
-        "column": 12
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 25,
+        "column": 16
       }
     },
-    "c35c4423746d": {
+    "8707943028a6": {
       "type": "content",
-      "sourceText": "Close",
+      "sourceText": "Join Workspace",
       "context": {
-        "componentName": "DialogFooter",
-        "filePath": "../components/ui/dialog.tsx"
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
       },
-      "hash": "c35c4423746d",
+      "hash": "8707943028a6",
       "location": {
-        "filePath": "../components/ui/dialog.tsx",
-        "line": 114,
-        "column": 10
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 32,
+        "column": 20
       }
     },
-    "6689f25882c8": {
+    "ab8c80b9d6bf": {
+      "type": "content",
+      "sourceText": "Enter the invite code shared with you to access the workspace.",
+      "context": {
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
+      },
+      "hash": "ab8c80b9d6bf",
+      "location": {
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 33,
+        "column": 20
+      }
+    },
+    "39e36833b035": {
+      "type": "content",
+      "sourceText": "Invite Code",
+      "context": {
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
+      },
+      "hash": "39e36833b035",
+      "location": {
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 39,
+        "column": 24
+      }
+    },
+    "723213496f14": {
+      "type": "attribute",
+      "sourceText": "e.g. 8f72a...",
+      "context": {
+        "attributeName": "placeholder",
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
+      },
+      "hash": "723213496f14",
+      "location": {
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 40,
+        "column": 24
+      }
+    },
+    "28b951ee45e2": {
+      "type": "content",
+      "sourceText": "Review Invite",
+      "context": {
+        "componentName": "JoinWorkspaceModal",
+        "filePath": "components/workspace/join-modal.tsx"
+      },
+      "hash": "28b951ee45e2",
+      "location": {
+        "filePath": "components/workspace/join-modal.tsx",
+        "line": 53,
+        "column": 20
+      }
+    },
+    "c2670d618c78": {
       "type": "content",
       "sourceText": "New Workspace",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "6689f25882c8",
+      "hash": "c2670d618c78",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 167,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 211,
         "column": 16
       }
     },
-    "670889f3aae3": {
+    "dde9e0fc8dfc": {
       "type": "content",
       "sourceText": "Create New Workspace",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "670889f3aae3",
+      "hash": "dde9e0fc8dfc",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 174,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 218,
         "column": 20
       }
     },
-    "29d29b472b6d": {
+    "3202fa71f3a2": {
       "type": "content",
       "sourceText": "Deploy a new cloud development environment in seconds.",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "29d29b472b6d",
+      "hash": "3202fa71f3a2",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 175,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 219,
         "column": 20
       }
     },
-    "4db5f07d40da": {
+    "48e069c8204b": {
       "type": "content",
       "sourceText": "GitHub",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "4db5f07d40da",
+      "hash": "48e069c8204b",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 186,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 230,
         "column": 24
       }
     },
-    "ac06daccea9b": {
+    "608d5cce19ea": {
       "type": "content",
       "sourceText": "Bitbucket",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "ac06daccea9b",
+      "hash": "608d5cce19ea",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 189,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 233,
         "column": 24
       }
     },
-    "80b4c4cf6281": {
+    "f65d499dd3e3": {
       "type": "content",
       "sourceText": "Import URL",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "80b4c4cf6281",
+      "hash": "f65d499dd3e3",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 192,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 236,
         "column": 24
       }
     },
-    "08cd78ae0a37": {
+    "e357923b1f01": {
       "type": "attribute",
       "sourceText": "Search repositories...",
       "context": {
         "attributeName": "placeholder",
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "08cd78ae0a37",
+      "hash": "e357923b1f01",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 203,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 247,
         "column": 40
       }
     },
-    "fc734bba3b2c": {
+    "691c4040955a": {
       "type": "content",
       "sourceText": "Your {source} account is not linked.",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "fc734bba3b2c",
+      "hash": "691c4040955a",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 217,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 261,
         "column": 48
       }
     },
-    "24115033d057": {
+    "d6e474937054": {
       "type": "content",
-      "sourceText": "Connect {expression0}",
+      "sourceText": "Link {expression0}",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "24115033d057",
+      "hash": "d6e474937054",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 219,
-        "column": 48
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 265,
+        "column": 52
       }
     },
-    "123baacab243": {
+    "967a637710e3": {
+      "type": "content",
+      "sourceText": "Check Connection",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "967a637710e3",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 272,
+        "column": 52
+      }
+    },
+    "db15ddab9bed": {
       "type": "content",
       "sourceText": "No repositories found.",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "123baacab243",
+      "hash": "db15ddab9bed",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 263,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 307,
         "column": 52
       }
     },
-    "1d89ef2333b2": {
+    "6790ad25eaa0": {
       "type": "content",
       "sourceText": "Git Repository URL",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "1d89ef2333b2",
+      "hash": "6790ad25eaa0",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 279,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 323,
         "column": 32
       }
     },
-    "5891864e9900": {
+    "e7cdc67db533": {
       "type": "attribute",
       "sourceText": "https://github.com/username/repo.git",
       "context": {
         "attributeName": "placeholder",
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "5891864e9900",
+      "hash": "e7cdc67db533",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 280,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 324,
         "column": 32
       }
     },
-    "0305955ee025": {
+    "71f6c212f1ab": {
       "type": "content",
       "sourceText": "Workspace Name",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "0305955ee025",
+      "hash": "71f6c212f1ab",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 295,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 339,
         "column": 28
       }
     },
-    "daec5c9769a8": {
+    "ec964a6a9cb1": {
       "type": "content",
       "sourceText": "Description <span0>(Optional)</span0>",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "daec5c9769a8",
+      "hash": "ec964a6a9cb1",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 303,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 347,
         "column": 28
       }
     },
-    "f326154299be": {
+    "69d55ac5c7b9": {
+      "type": "content",
+      "sourceText": "Hosting Strategy",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "69d55ac5c7b9",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 356,
+        "column": 28
+      }
+    },
+    "dfa233e23a42": {
+      "type": "content",
+      "sourceText": "Run in Cloud",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "dfa233e23a42",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 371,
+        "column": 44
+      }
+    },
+    "f65836e3098a": {
+      "type": "content",
+      "sourceText": "Persistent environment running on our secure infrastructure",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "f65836e3098a",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 372,
+        "column": 44
+      }
+    },
+    "b2fb63e33f8e": {
+      "type": "content",
+      "sourceText": "Run Locally",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "b2fb63e33f8e",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 389,
+        "column": 44
+      }
+    },
+    "909d763273c9": {
+      "type": "content",
+      "sourceText": "Shareable Docker environment hosted on your own machine",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "909d763273c9",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 390,
+        "column": 44
+      }
+    },
+    "55365bd2006c": {
+      "type": "content",
+      "sourceText": "Local Agent Not Connected",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "55365bd2006c",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 398,
+        "column": 36
+      }
+    },
+    "f5b424b5bbea": {
+      "type": "content",
+      "sourceText": "To host locally, you must run the agent on your machine: <code0></code0>",
+      "context": {
+        "componentName": "CreateWorkspaceModal",
+        "filePath": "components/workspace/create-modal.tsx"
+      },
+      "hash": "f5b424b5bbea",
+      "location": {
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 402,
+        "column": 36
+      }
+    },
+    "6c745aa770ef": {
       "type": "content",
       "sourceText": "Back",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "f326154299be",
+      "hash": "6c745aa770ef",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 317,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 416,
         "column": 32
       }
     },
-    "efb8744c5e51": {
+    "dfbb89615292": {
       "type": "content",
       "sourceText": "{expression0} Create Workspace",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "efb8744c5e51",
+      "hash": "dfbb89615292",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 319,
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 418,
         "column": 28
       }
     },
-    "65e90c5dd468": {
+    "ca3220fccd50": {
       "type": "content",
       "sourceText": "Select a repository to proceed",
       "context": {
         "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "filePath": "components/workspace/create-modal.tsx"
       },
-      "hash": "65e90c5dd468",
+      "hash": "ca3220fccd50",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
+        "filePath": "components/workspace/create-modal.tsx",
+        "line": 428,
+        "column": 24
+      }
+    },
+    "c037e047ac1e": {
+      "type": "content",
+      "sourceText": "Close",
+      "context": {
+        "componentName": "DialogContent",
+        "filePath": "components/ui/dialog.tsx"
+      },
+      "hash": "c037e047ac1e",
+      "location": {
+        "filePath": "components/ui/dialog.tsx",
+        "line": 76,
+        "column": 12
+      }
+    },
+    "fb8a55237832": {
+      "type": "content",
+      "sourceText": "Close",
+      "context": {
+        "componentName": "DialogFooter",
+        "filePath": "components/ui/dialog.tsx"
+      },
+      "hash": "fb8a55237832",
+      "location": {
+        "filePath": "components/ui/dialog.tsx",
+        "line": 114,
+        "column": 10
+      }
+    },
+    "ddacebabff09": {
+      "type": "content",
+      "sourceText": "Incoming Call",
+      "context": {
+        "componentName": "CallSystem",
+        "filePath": "components/workspace/CallSystem.tsx"
+      },
+      "hash": "ddacebabff09",
+      "location": {
+        "filePath": "components/workspace/CallSystem.tsx",
+        "line": 61,
+        "column": 24
+      }
+    },
+    "b8942b734ea8": {
+      "type": "content",
+      "sourceText": "<span0>{expression0}</span0> is inviting you to a voice call.",
+      "context": {
+        "componentName": "CallSystem",
+        "filePath": "components/workspace/CallSystem.tsx"
+      },
+      "hash": "b8942b734ea8",
+      "location": {
+        "filePath": "components/workspace/CallSystem.tsx",
+        "line": 65,
+        "column": 24
+      }
+    },
+    "30fe4bea4073": {
+      "type": "content",
+      "sourceText": "Decline",
+      "context": {
+        "componentName": "CallSystem",
+        "filePath": "components/workspace/CallSystem.tsx"
+      },
+      "hash": "30fe4bea4073",
+      "location": {
+        "filePath": "components/workspace/CallSystem.tsx",
+        "line": 76,
+        "column": 24
+      }
+    },
+    "e79617d7c5f3": {
+      "type": "content",
+      "sourceText": "Accept & Join {expression0}",
+      "context": {
+        "componentName": "CallSystem",
+        "filePath": "components/workspace/CallSystem.tsx"
+      },
+      "hash": "e79617d7c5f3",
+      "location": {
+        "filePath": "components/workspace/CallSystem.tsx",
+        "line": 83,
+        "column": 24
+      }
+    },
+    "c656e2899f50": {
+      "type": "content",
+      "sourceText": "Active {callMode}",
+      "context": {
+        "componentName": "CallSystem",
+        "filePath": "components/workspace/CallSystem.tsx"
+      },
+      "hash": "c656e2899f50",
+      "location": {
+        "filePath": "components/workspace/CallSystem.tsx",
+        "line": 116,
+        "column": 32
+      }
+    },
+    "cce0061a6123": {
+      "type": "content",
+      "sourceText": "Friends",
+      "context": {
+        "componentName": "FriendsModal",
+        "filePath": "components/workspace/FriendsModal.tsx"
+      },
+      "hash": "cce0061a6123",
+      "location": {
+        "filePath": "components/workspace/FriendsModal.tsx",
+        "line": 135,
+        "column": 20
+      }
+    },
+    "0b66fd0bfd70": {
+      "type": "content",
+      "sourceText": "Loading friends...",
+      "context": {
+        "componentName": "FriendsModal",
+        "filePath": "components/workspace/FriendsModal.tsx"
+      },
+      "hash": "0b66fd0bfd70",
+      "location": {
+        "filePath": "components/workspace/FriendsModal.tsx",
+        "line": 143,
+        "column": 24
+      }
+    },
+    "83cb923cfb89": {
+      "type": "content",
+      "sourceText": "No friends yet",
+      "context": {
+        "componentName": "FriendsModal",
+        "filePath": "components/workspace/FriendsModal.tsx"
+      },
+      "hash": "83cb923cfb89",
+      "location": {
+        "filePath": "components/workspace/FriendsModal.tsx",
+        "line": 149,
+        "column": 28
+      }
+    },
+    "17f945dfec62": {
+      "type": "content",
+      "sourceText": "Collaborate on workspaces to add friends!",
+      "context": {
+        "componentName": "FriendsModal",
+        "filePath": "components/workspace/FriendsModal.tsx"
+      },
+      "hash": "17f945dfec62",
+      "location": {
+        "filePath": "components/workspace/FriendsModal.tsx",
+        "line": 150,
+        "column": 28
+      }
+    },
+    "a4904298f86d": {
+      "type": "content",
+      "sourceText": "View Image",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "a4904298f86d",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 312,
+        "column": 24
+      }
+    },
+    "57f321446ad9": {
+      "type": "attribute",
+      "sourceText": "Full Size",
+      "context": {
+        "attributeName": "alt",
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "57f321446ad9",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 321,
+        "column": 32
+      }
+    },
+    "393f5eb75d5a": {
+      "type": "content",
+      "sourceText": "{expression0}%",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "393f5eb75d5a",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 334,
+        "column": 24
+      }
+    },
+    "e7a7008189ae": {
+      "type": "attribute",
+      "sourceText": "Reset Zoom",
+      "context": {
+        "attributeName": "title",
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "e7a7008189ae",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 341,
+        "column": 24
+      }
+    },
+    "3db99ce93e80": {
+      "type": "content",
+      "sourceText": "Save",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "3db99ce93e80",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 345,
+        "column": 24
+      }
+    },
+    "b18979a136ea": {
+      "type": "content",
+      "sourceText": "Team Chat",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "b18979a136ea",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 367,
+        "column": 24
+      }
+    },
+    "0c954cef65b6": {
+      "type": "attribute",
+      "sourceText": "Chat Settings",
+      "context": {
+        "attributeName": "title",
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "0c954cef65b6",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 372,
+        "column": 32
+      }
+    },
+    "f0e871654294": {
+      "type": "content",
+      "sourceText": "Font Size",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "f0e871654294",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 377,
+        "column": 32
+      }
+    },
+    "8b19a6f356ea": {
+      "type": "content",
+      "sourceText": "Small",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "8b19a6f356ea",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 380,
+        "column": 36
+      }
+    },
+    "10520ef8ecce": {
+      "type": "content",
+      "sourceText": "Medium",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "10520ef8ecce",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 384,
+        "column": 36
+      }
+    },
+    "138a23b618ba": {
+      "type": "content",
+      "sourceText": "Large",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "138a23b618ba",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 388,
+        "column": 36
+      }
+    },
+    "b65dfafbddeb": {
+      "type": "content",
+      "sourceText": "No conversation yet",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "b65dfafbddeb",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 411,
+        "column": 40
+      }
+    },
+    "a7296fc81fb0": {
+      "type": "content",
+      "sourceText": "Start the discussion by sending a message below.",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "a7296fc81fb0",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 412,
+        "column": 40
+      }
+    },
+    "3646a94ae483": {
+      "type": "attribute",
+      "sourceText": "Hold to Record",
+      "context": {
+        "attributeName": "title",
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "3646a94ae483",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 570,
+        "column": 28
+      }
+    },
+    "da45f5a7dedd": {
+      "type": "content",
+      "sourceText": "<span0></span0> REC {expression0}",
+      "context": {
+        "componentName": "ChatSidebar",
+        "filePath": "components/editor/ChatSidebar.tsx"
+      },
+      "hash": "da45f5a7dedd",
+      "location": {
+        "filePath": "components/editor/ChatSidebar.tsx",
+        "line": 582,
+        "column": 36
+      }
+    },
+    "71847f6118a8": {
+      "type": "attribute",
+      "sourceText": "New File",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileTreeItem",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "71847f6118a8",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 247,
+        "column": 40
+      }
+    },
+    "cbee334f5057": {
+      "type": "attribute",
+      "sourceText": "New Folder",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileTreeItem",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "cbee334f5057",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 254,
+        "column": 40
+      }
+    },
+    "82aed19ebbbe": {
+      "type": "attribute",
+      "sourceText": "Rename",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileTreeItem",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "82aed19ebbbe",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 263,
+        "column": 32
+      }
+    },
+    "1942792d19bc": {
+      "type": "attribute",
+      "sourceText": "Delete",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileTreeItem",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "1942792d19bc",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 270,
+        "column": 32
+      }
+    },
+    "5bf2f5fa3dd7": {
+      "type": "content",
+      "sourceText": "Explorer",
+      "context": {
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "5bf2f5fa3dd7",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
         "line": 329,
+        "column": 16
+      }
+    },
+    "aca2ddfb1a55": {
+      "type": "attribute",
+      "sourceText": "New File",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "aca2ddfb1a55",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 331,
+        "column": 20
+      }
+    },
+    "5623a39794bd": {
+      "type": "attribute",
+      "sourceText": "New Folder",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "5623a39794bd",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 338,
+        "column": 20
+      }
+    },
+    "561c64b24a45": {
+      "type": "attribute",
+      "sourceText": "Refresh Explorer",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "561c64b24a45",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 345,
+        "column": 20
+      }
+    },
+    "70f9f25ce93d": {
+      "type": "attribute",
+      "sourceText": "Collapse Folders",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "70f9f25ce93d",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 352,
+        "column": 20
+      }
+    },
+    "efa95a08a691": {
+      "type": "attribute",
+      "sourceText": "Expand Folders",
+      "context": {
+        "attributeName": "title",
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "efa95a08a691",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 359,
+        "column": 20
+      }
+    },
+    "5bf19d0e3120": {
+      "type": "content",
+      "sourceText": "Empty Workspace",
+      "context": {
+        "componentName": "FileExplorer",
+        "filePath": "components/editor/FileExplorer.tsx"
+      },
+      "hash": "5bf19d0e3120",
+      "location": {
+        "filePath": "components/editor/FileExplorer.tsx",
+        "line": 401,
         "column": 24
       }
     },
-    "c82504b72d23": {
+    "4786671c0731": {
+      "type": "content",
+      "sourceText": "Shared Terminal",
+      "context": {
+        "componentName": "CustomIDE",
+        "filePath": "components/editor/CustomIDE.tsx"
+      },
+      "hash": "4786671c0731",
+      "location": {
+        "filePath": "components/editor/CustomIDE.tsx",
+        "line": 52,
+        "column": 36
+      }
+    },
+    "136c2c9e988c": {
+      "type": "content",
+      "sourceText": "Loading Workspace...",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "136c2c9e988c",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 286,
+        "column": 20
+      }
+    },
+    "9f18fec2531b": {
+      "type": "content",
+      "sourceText": "Workspace Not Found",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "9f18fec2531b",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 296,
+        "column": 16
+      }
+    },
+    "f34ab5102db9": {
+      "type": "content",
+      "sourceText": "This workspace may have been deleted or you may not have permission to view it.",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "f34ab5102db9",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 297,
+        "column": 16
+      }
+    },
+    "788b30731744": {
       "type": "content",
       "sourceText": "Back to Dashboard",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/page.tsx"
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "c82504b72d23",
+      "hash": "788b30731744",
       "location": {
-        "filePath": "../app/profile/page.tsx",
-        "line": 12,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 298,
+        "column": 16
+      }
+    },
+    "e28562ef1887": {
+      "type": "attribute",
+      "sourceText": "Restart Environment",
+      "context": {
+        "attributeName": "title",
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "e28562ef1887",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 328,
+        "column": 20
+      }
+    },
+    "bad5afae66eb": {
+      "type": "attribute",
+      "sourceText": "Audio Call",
+      "context": {
+        "attributeName": "title",
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "bad5afae66eb",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 342,
         "column": 24
       }
     },
-    "925a36054c89": {
-      "type": "content",
-      "sourceText": "Back to Dashboard",
+    "94fe8629f8d8": {
+      "type": "attribute",
+      "sourceText": "Video Call",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "attributeName": "title",
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "925a36054c89",
+      "hash": "94fe8629f8d8",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 12,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 351,
         "column": 24
       }
     },
-    "4227edb5442c": {
+    "38b4aae91b89": {
       "type": "content",
-      "sourceText": "Link {expression0}",
+      "sourceText": "Friends",
       "context": {
-        "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "4227edb5442c",
+      "hash": "38b4aae91b89",
       "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 221,
-        "column": 52
-      }
-    },
-    "8e26b6f15f25": {
-      "type": "content",
-      "sourceText": "Check Connection",
-      "context": {
-        "componentName": "CreateWorkspaceModal",
-        "filePath": "../components/workspace/create-modal.tsx"
-      },
-      "hash": "8e26b6f15f25",
-      "location": {
-        "filePath": "../components/workspace/create-modal.tsx",
-        "line": 228,
-        "column": 52
-      }
-    },
-    "38b4c6ae4780": {
-      "type": "content",
-      "sourceText": "Account Linking",
-      "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
-      },
-      "hash": "38b4c6ae4780",
-      "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 21,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 363,
         "column": 24
       }
     },
-    "e04a4feb8c68": {
+    "250d632d112e": {
       "type": "content",
-      "sourceText": "Link your GitHub or Bitbucket account to import repositories into your workspaces. <br0></br0> Once linked, you can return to the dashboard to refresh your connection.",
+      "sourceText": "Collaborative",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "e04a4feb8c68",
+      "hash": "250d632d112e",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 22,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 373,
         "column": 24
       }
     },
-    "7047be1ed8c5": {
+    "5835aa69de9a": {
       "type": "content",
-      "sourceText": "Social Account Linking",
+      "sourceText": "Cloud IDE",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "7047be1ed8c5",
+      "hash": "5835aa69de9a",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 21,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 382,
         "column": 24
       }
     },
-    "d1280f7ede30": {
-      "type": "content",
-      "sourceText": "Connect your GitHub or Bitbucket accounts below to enable repository fetching.",
+    "0562cfad7bec": {
+      "type": "attribute",
+      "sourceText": "Destroy Workspace",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "attributeName": "title",
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "d1280f7ede30",
+      "hash": "0562cfad7bec",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 22,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 394,
         "column": 24
       }
     },
-    "a8a217760b7d": {
+    "96e5aaf79171": {
       "type": "content",
-      "sourceText": "<strong0>Note:</strong0> If you don''t see GitHub or Bitbucket in \"Connected accounts\", ensure they are enabled in your <strong1>Clerk Dashboard</strong1> under <em0>Configure > User & Authentication > Social Connections</em0>.",
+      "sourceText": "ACTION: {expression0}",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
       },
-      "hash": "a8a217760b7d",
+      "hash": "96e5aaf79171",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 25,
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 438,
+        "column": 36
+      }
+    },
+    "abbd3e15814f": {
+      "type": "content",
+      "sourceText": "Try Reconnect",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "abbd3e15814f",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 443,
+        "column": 36
+      }
+    },
+    "44bd96953760": {
+      "type": "content",
+      "sourceText": "Hard Reset",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "44bd96953760",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 446,
+        "column": 36
+      }
+    },
+    "bf4aa42a8d49": {
+      "type": "content",
+      "sourceText": "Initializing Cloud Environment",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "bf4aa42a8d49",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 459,
+        "column": 32
+      }
+    },
+    "4cdd0fc417ec": {
+      "type": "content",
+      "sourceText": "While you wait...",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "4cdd0fc417ec",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 465,
+        "column": 36
+      }
+    },
+    "b1b0d731a633": {
+      "type": "content",
+      "sourceText": "\"{devTip}\"",
+      "context": {
+        "componentName": "WorkspacePage",
+        "filePath": "app/workspace/[id]/page.tsx"
+      },
+      "hash": "b1b0d731a633",
+      "location": {
+        "filePath": "app/workspace/[id]/page.tsx",
+        "line": 466,
+        "column": 36
+      }
+    },
+    "ce8e3f8b59d7": {
+      "type": "content",
+      "sourceText": "Establishing Secure Connection...",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "ce8e3f8b59d7",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 79,
+        "column": 12
+      }
+    },
+    "de161f255175": {
+      "type": "content",
+      "sourceText": "Live {expression0}",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "de161f255175",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 90,
+        "column": 20
+      }
+    },
+    "1d2537d5f7b5": {
+      "type": "content",
+      "sourceText": "{expression0} Connected",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "1d2537d5f7b5",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 92,
+        "column": 16
+      }
+    },
+    "f474dd4401cf": {
+      "type": "content",
+      "sourceText": "Video Paused",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "f474dd4401cf",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 135,
+        "column": 44
+      }
+    },
+    "92a87f83ba1e": {
+      "type": "content",
+      "sourceText": "You",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "92a87f83ba1e",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 141,
+        "column": 40
+      }
+    },
+    "3fbf070cd56c": {
+      "type": "content",
+      "sourceText": "<Video0></Video0> Viewing {expression0}",
+      "context": {
+        "componentName": "VoiceChatPanel",
+        "filePath": "components/workspace/voice-chat.tsx"
+      },
+      "hash": "3fbf070cd56c",
+      "location": {
+        "filePath": "components/workspace/voice-chat.tsx",
+        "line": 208,
         "column": 24
       }
     },
-    "d452c1dfede9": {
+    "d990c7c64ec8": {
       "type": "content",
-      "sourceText": "<strong0>Note:</strong0> If you don''t see GitHub or Bitbucket in \"Connected accounts\", ensure they are enabled in your <strong1>Clerk Dashboard</strong1> under <em0>Configure → User & Authentication → Social Connections</em0>.",
+      "sourceText": "←",
       "context": {
-        "componentName": "ProfilePage",
-        "filePath": "../app/profile/[[...rest]]/page.tsx"
+        "componentName": "CodeEditor",
+        "filePath": "components/editor/Editor.tsx"
       },
-      "hash": "d452c1dfede9",
+      "hash": "d990c7c64ec8",
       "location": {
-        "filePath": "../app/profile/[[...rest]]/page.tsx",
-        "line": 25,
-        "column": 24
+        "filePath": "components/editor/Editor.tsx",
+        "line": 163,
+        "column": 16
+      }
+    },
+    "d0cbe81ae83e": {
+      "type": "content",
+      "sourceText": "Select a file to start editing",
+      "context": {
+        "componentName": "CodeEditor",
+        "filePath": "components/editor/Editor.tsx"
+      },
+      "hash": "d0cbe81ae83e",
+      "location": {
+        "filePath": "components/editor/Editor.tsx",
+        "line": 164,
+        "column": 16
+      }
+    },
+    "ba2039db20c3": {
+      "type": "content",
+      "sourceText": "Settings",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "ba2039db20c3",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 125,
+        "column": 20
+      }
+    },
+    "43fde1520c8b": {
+      "type": "content",
+      "sourceText": "Manage your account settings and developer keys.",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "43fde1520c8b",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 126,
+        "column": 20
+      }
+    },
+    "93c4ede4d49c": {
+      "type": "content",
+      "sourceText": "API Keys",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "93c4ede4d49c",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 133,
+        "column": 32
+      }
+    },
+    "96b92025b045": {
+      "type": "content",
+      "sourceText": "Manage API keys for the Local Agent.",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "96b92025b045",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 137,
+        "column": 32
+      }
+    },
+    "c981cb76177d": {
+      "type": "content",
+      "sourceText": "New Key Name",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "c981cb76177d",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 146,
+        "column": 32
+      }
+    },
+    "d6c841d66bcb": {
+      "type": "attribute",
+      "sourceText": "e.g. MacBook Pro Agent",
+      "context": {
+        "attributeName": "placeholder",
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "d6c841d66bcb",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 147,
+        "column": 32
+      }
+    },
+    "f9866adec840": {
+      "type": "content",
+      "sourceText": "Generate Key",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "f9866adec840",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 159,
+        "column": 62
+      }
+    },
+    "ad68110c283b": {
+      "type": "content",
+      "sourceText": "Name",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "ad68110c283b",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 167,
+        "column": 40
+      }
+    },
+    "5d43ae882572": {
+      "type": "content",
+      "sourceText": "Key",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "5d43ae882572",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 168,
+        "column": 40
+      }
+    },
+    "24bed1bd4046": {
+      "type": "content",
+      "sourceText": "Created",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "24bed1bd4046",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 169,
+        "column": 40
+      }
+    },
+    "6f733961c918": {
+      "type": "content",
+      "sourceText": "Actions",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "6f733961c918",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 170,
+        "column": 40
+      }
+    },
+    "6ca2f8032924": {
+      "type": "content",
+      "sourceText": "Loading...",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "6ca2f8032924",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 176,
+        "column": 44
+      }
+    },
+    "4961f97f2ce8": {
+      "type": "content",
+      "sourceText": "No API keys found. Create one to get started.",
+      "context": {
+        "componentName": "SettingsPage",
+        "filePath": "app/(dashboard)/settings/page.tsx"
+      },
+      "hash": "4961f97f2ce8",
+      "location": {
+        "filePath": "app/(dashboard)/settings/page.tsx",
+        "line": 180,
+        "column": 44
       }
     }
   },
   "stats": {
-    "totalEntries": 34,
-    "lastUpdated": "2026-02-01T12:54:55.332Z"
+    "totalEntries": 112,
+    "lastUpdated": "2026-02-09T15:18:19.460Z"
   }
 }

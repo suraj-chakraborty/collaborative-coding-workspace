@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { Octokit } from "octokit";
 import {
@@ -31,6 +31,15 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+const GET_AGENT_STATUS = gql`
+  query GetAgentStatus($email: String!) {
+    me(email: $email) {
+      id
+      isAgentConnected
+    }
+  }
+`;
+
 const CREATE_WORKSPACE = gql`
   mutation CreateWorkspace($name: String!, $description: String, $userId: String!, $email: String!, $repoUrl: String, $repoToken: String, $hostingType: String, $localPort: Int) {
     createWorkspace(name: $name, description: $description, userId: $userId, email: $email, repoUrl: $repoUrl, repoToken: $repoToken, hostingType: $hostingType, localPort: $localPort) {
@@ -40,30 +49,41 @@ const CREATE_WORKSPACE = gql`
   }
 `;
 
+interface AgentStatusData {
+    me: {
+        id: string;
+        isAgentConnected: boolean;
+    } | null;
+}
+
 export function CreateWorkspaceModal() {
-    const { user } = useUser();
     const router = useRouter();
+    const { user } = useUser();
     const [open, setOpen] = useState(false);
+    // ... existing state ...
+    const [hostingType, setHostingType] = useState<"CLOUD" | "LOCAL">("CLOUD");
+
+    const [source, setSource] = useState<"github" | "bitbucket" | "manual">("github");
     const [step, setStep] = useState(1);
-    const [source, setSource] = useState<"github" | "manual" | "bitbucket">("github");
-    const [loading, setLoading] = useState(false);
-    const [githubToken, setGithubToken] = useState<string | null>(null);
-    const [bitbucketToken, setBitbucketToken] = useState<string | null>(null);
+    const [refresh, setRefresh] = useState(0);
     const [repos, setRepos] = useState<any[]>([]);
+    const [selectedRepo, setSelectedRepo] = useState<any | null>(null);
     const [repoSearch, setRepoSearch] = useState("");
     const [loadingRepos, setLoadingRepos] = useState(false);
     const [tokenMissing, setTokenMissing] = useState(false);
-    const [refresh, setRefresh] = useState(0);
-    const [hostingType, setHostingType] = useState<"CLOUD" | "LOCAL">("CLOUD");
+    const [githubToken, setGithubToken] = useState<string | null>(null);
+    const [bitbucketToken, setBitbucketToken] = useState<string | null>(null);
+    const [formData, setFormData] = useState({ name: "", description: "", repoUrl: "" });
+    const [loading, setLoading] = useState(false);
 
-    // Form State
-    const [selectedRepo, setSelectedRepo] = useState<any>(null);
-    const [formData, setFormData] = useState({
-        name: "",
-        description: "",
-        repoUrl: "",
+    // Agent Query
+    const { data: agentData } = useQuery<AgentStatusData>(GET_AGENT_STATUS, {
+        variables: { email: user?.primaryEmailAddress?.emailAddress || "" },
+        skip: !user?.primaryEmailAddress?.emailAddress || !open
     });
 
+    // Form State
+    // ... existing code ...
     const [createWorkspace] = useMutation(CREATE_WORKSPACE);
 
     // Fetch OAuth Token when source changes
@@ -147,16 +167,21 @@ export function CreateWorkspaceModal() {
             return;
         }
 
+        if (!user?.id || !user?.primaryEmailAddress?.emailAddress) {
+            toast.error("You must be logged in to create a workspace");
+            return;
+        }
+
         setLoading(true);
         try {
             const token = source === "github" ? githubToken : (source === "bitbucket" ? bitbucketToken : undefined);
             const { data } = await createWorkspace({
                 variables: {
                     name: formData.name,
-                    description: formData.description,
-                    userId: user?.id,
-                    email: user?.primaryEmailAddress?.emailAddress,
-                    repoUrl: (source === "github" || source === "bitbucket") ? selectedRepo?.clone_url : formData.repoUrl,
+                    description: formData.description || undefined,
+                    userId: user.id,
+                    email: user.primaryEmailAddress.emailAddress,
+                    repoUrl: (source === "github" || source === "bitbucket") ? selectedRepo?.clone_url : formData.repoUrl || undefined,
                     repoToken: token || undefined,
                     hostingType,
                     localPort: hostingType === "LOCAL" ? 5173 : undefined
@@ -367,6 +392,19 @@ export function CreateWorkspaceModal() {
                                     </div>
                                 </button>
                             </div>
+
+                            {hostingType === "LOCAL" && !agentData?.me?.isAgentConnected && (
+                                <div className="mt-2 rounded-md border border-yellow-500/20 bg-yellow-500/10 p-3 text-sm text-yellow-200">
+                                    <div className="flex items-center gap-2 font-semibold">
+                                        <Terminal className="h-4 w-4" />
+                                        Local Agent Not Connected
+                                    </div>
+                                    <div className="mt-1 text-xs opacity-80">
+                                        To host locally, you must run the agent on your machine:
+                                        <code className="ml-1 rounded bg-black/20 px-1 py-0.5 font-mono">npm run agent</code>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}

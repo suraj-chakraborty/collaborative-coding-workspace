@@ -10,8 +10,13 @@
 !.yarn/releases
 !.yarn/versions
 /src/apps/node_modules
+/src/agent/node_modules
+/src/agent/dist
 /src/apps/.next
 /src/server/node_modules
+/src/server/dist
+/prisma/migrations
+/prisma/seed.ts
 # testing
 /coverage
 
@@ -33,7 +38,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
 
 # vercel
 .vercel
