@@ -60,15 +60,35 @@ export const setupWorkspace = inngest.createFunction(
             }
         });
 
-        // 3. Create Docker Resources
-        await step.run("create-container", async () => {
-            await DockerService.createContainer(workspaceId);
-        });
+        // 3. Create & Start Resources
+        if (workspace.hostingType === "CLOUD") {
+            const { AwsService } = await import("../services/aws");
+            await step.run("create-cloud-container", async () => {
+                await AwsService.createContainer(workspaceId);
+            });
+        } else {
+            // Local Docker Setup (via Agent or Server)
+            const { AgentService } = await import("../services/agent");
 
-        // 4. Start Container & Clone Repo
-        await step.run("start-container", async () => {
-            await DockerService.startContainer(workspaceId);
-        });
+            // Check if agent is connected
+            if (AgentService.isAgentConnected(workspace.ownerId)) {
+                await step.run("spawn-agent-container", async () => {
+                    await AgentService.spawnContainer(workspace.ownerId, workspaceId);
+                });
+            } else {
+                // Legacy / Dev Fallback: Server-side Docker
+                // Only run this if we are NOT in production or if explicitly desired
+                console.log("No agent connected, falling back to server-side Docker");
+
+                await step.run("create-container", async () => {
+                    await DockerService.createContainer(workspaceId);
+                });
+
+                await step.run("start-container", async () => {
+                    await DockerService.startContainer(workspaceId);
+                });
+            }
+        }
 
         return {
             success: true,

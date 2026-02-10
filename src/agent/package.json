@@ -1,0 +1,38 @@
+{
+    "name": "@collab-cloud/agent",
+    "version": "1.0.0",
+    "description": "Local agent for Collaborative Coding Workspace to enable local hosting with cloud backend",
+    "main": "dist/index.js",
+    "bin": {
+        "ccw-agent": "dist/index.js"
+    },
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+    },
+    "keywords": [
+        "collaborative-coding",
+        "agent",
+        "tunnel",
+        "docker"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "chalk": "^5.3.0",
+        "commander": "^13.1.0",
+        "dockerode": "^4.0.2",
+        "dotenv": "^16.4.7",
+        "ora": "^8.0.1",
+        "socket.io-client": "^4.8.1"
+    },
+    "devDependencies": {
+        "@types/dockerode": "^3.3.31",
+        "@types/node": "^22.10.6",
+        "@types/socket.io-client": "^3.0.0",
+        "pkg": "^5.8.1",
+        "ts-node-dev": "^2.0.0",
+        "typescript": "^5.7.3"
+    }
+}

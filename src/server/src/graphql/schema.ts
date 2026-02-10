@@ -3,28 +3,45 @@ import { GitService } from "../services/git";
 import { DockerService } from "../services/docker";
 import { prisma } from "../lib/prisma";
 import { inngest } from "../lib/inngest";
+import { AgentService } from "../services/agent";
 
 export const typeDefs = gql`
+  type ApiKey {
+    id: ID!
+    key: String!
+    name: String
+    lastUsedAt: String
+    createdAt: String!
+  }
+
   type User {
-    id: String!
+    id: ID!
     email: String!
     name: String
     image: String
     workspaces: [WorkspaceMember!]
+    isAgentConnected: Boolean
+    apiKeys: [ApiKey!]
   }
 
   type Workspace {
-    id: String!
+    id: ID!
     name: String!
+    slug: String!
     description: String
-    ownerId: String!
-    members: [WorkspaceMember!]!
-    invites: [WorkspaceInvite!]!
-    hostingType: String!
+    repoUrl: String
+    repoToken: String
+    repoPath: String
+    hostingType: String
     localPort: Int
+    stack: String
+    ownerId: String!
+    owner: User!
+    members: [WorkspaceMember!]!
+    invites: [WorkspaceInvite!]
+    containers: [Container!]
     createdAt: String!
     updatedAt: String!
-    containers: [Container!]
   }
 
   type WorkspaceMember {
@@ -64,16 +81,9 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    createWorkspace(
-      name: String!
-      description: String
-      userId: String!
-      email: String!
-      repoUrl: String
-      repoToken: String
-      hostingType: String
-      localPort: Int
-    ): Workspace
+    createApiKey(userId: String!, email: String!, name: String): ApiKey
+    revokeApiKey(id: String!): Boolean
+    createWorkspace(name: String!, description: String, userId: String!, email: String!, repoUrl: String, repoToken: String, hostingType: String, localPort: Int): Workspace
     joinWorkspace(inviteCode: String!, userId: String!, email: String, name: String, image: String): Workspace
     deleteWorkspace(id: String!, userId: String!): Boolean
     createInvite(workspaceId: String!, role: String!, inviterId: String!): WorkspaceInvite
@@ -143,7 +153,50 @@ export const resolvers = {
             }));
         },
     },
+    User: {
+        isAgentConnected: (parent: any) => {
+            return AgentService.isAgentConnected(parent.id);
+        },
+        apiKeys: async (parent: any) => {
+            return await prisma.apiKey.findMany({
+                where: { userId: parent.id },
+                orderBy: { createdAt: 'desc' }
+            });
+        }
+    },
+    Workspace: {
+        invites: async (parent: any) => {
+            return await prisma.workspaceInvite.findMany({
+                where: { workspaceId: parent.id }
+            });
+        }
+    },
     Mutation: {
+        createApiKey: async (_: any, { userId, email, name }: { userId: string, email: string, name?: string }) => {
+            // Upsert user to ensure they exist (Foreign Key Constraint)
+            await prisma.user.upsert({
+                where: { id: userId },
+                update: { email },
+                create: {
+                    id: userId,
+                    email,
+                    name: email.split("@")[0]
+                }
+            });
+
+            const key = "ccw_" + require("crypto").randomBytes(24).toString("hex");
+            return await prisma.apiKey.create({
+                data: {
+                    userId,
+                    name,
+                    key
+                }
+            });
+        },
+        revokeApiKey: async (_: any, { id }: { id: string }) => {
+            await prisma.apiKey.delete({ where: { id } });
+            return true;
+        },
         createWorkspace: async (
             _: any,
             {
@@ -334,16 +387,21 @@ export const resolvers = {
         deleteWorkspace: async (_: any, { id, userId }: { id: string; userId: string }) => {
             const workspace = await prisma.workspace.findUnique({
                 where: { id },
-                select: { ownerId: true }
+                select: { ownerId: true, hostingType: true }
             });
 
             if (!workspace || workspace.ownerId !== userId) {
                 throw new Error("Unauthorized: Only the owner can delete this workspace");
             }
 
-            // Stop and remove docker container
+            // Stop and remove container
             try {
-                await DockerService.stopAndRemoveContainer(id).catch(() => null);
+                if (workspace.hostingType === "CLOUD") {
+                    const { AwsService } = await import("../services/aws");
+                    await AwsService.stopContainer(id);
+                } else {
+                    await DockerService.stopAndRemoveContainer(id).catch(() => null);
+                }
             } catch (e) {
                 console.error("Failed to remove container on delete", e);
             }

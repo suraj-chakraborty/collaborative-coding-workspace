@@ -44,6 +44,13 @@ const startServer = async () => {
 
     await apolloServer.start();
 
+
+
+    // Proxy routes for the IDE (Must be before body-parser)
+    app.all("/ws/:id*", (req, res) => {
+        proxyRequestHandler(req, res);
+    });
+
     app.use(cors());
     app.use(express.json({ limit: "50mb" }));
     app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
@@ -134,10 +141,7 @@ const startServer = async () => {
     // Translation Routes
     app.use("/api/translate", translateRouter);
 
-    // Proxy routes for the IDE
-    app.all("/ws/:id*", (req, res) => {
-        proxyRequestHandler(req, res);
-    });
+
 
     // Handle WebSocket upgrades
     server.on("upgrade", async (req, socket, head) => {
@@ -187,7 +191,7 @@ const startServer = async () => {
     });
 
     app.get("/health", (req, res) => {
-        res.send("Server healthy");
+        res.send("Server healthy - " + new Date().toISOString());
     });
 
     // Socket.IO Middleware for Authentication
@@ -211,6 +215,10 @@ const startServer = async () => {
             next(new Error("Authentication error"));
         }
     });
+
+    // Initialize Agent Service
+    const { AgentService } = require("./services/agent");
+    AgentService.init(io);
 
     // Socket.IO for Chat & Platform Events
     io.on("connection", (socket) => {
